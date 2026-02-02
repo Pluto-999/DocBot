@@ -11,7 +11,7 @@ data class Conversation(
     @Id var id: Long = 0,
     var title: String = "",
     var favourite: Boolean = false,
-    var latest_message: Date = Date()
+    var latestMessage: Date = Date()
 ) {
     @Backlink(to = "conversation")
     lateinit var messages: ToMany<Message>

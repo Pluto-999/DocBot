@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:793121249725687056",
-      "lastPropertyId": "4:3321454172349311093",
+      "lastPropertyId": "5:9005243691623318185",
       "name": "Conversation",
       "properties": [
         {
@@ -25,8 +25,8 @@
           "type": 1
         },
         {
-          "id": "4:3321454172349311093",
-          "name": "latest_message",
+          "id": "5:9005243691623318185",
+          "name": "latestMessage",
           "type": 10
         }
       ],
@@ -96,7 +96,7 @@
     },
     {
       "id": "5:5653629595122050383",
-      "lastPropertyId": "6:8177457130080836204",
+      "lastPropertyId": "7:4712266485203504796",
       "name": "Message",
       "properties": [
         {
@@ -111,19 +111,9 @@
           "type": 9
         },
         {
-          "id": "3:674548584452716297",
-          "name": "message_type",
-          "type": 9
-        },
-        {
           "id": "4:4160250764296904672",
           "name": "timestamp",
           "type": 10
-        },
-        {
-          "id": "5:2797689069606964513",
-          "name": "conversation_id",
-          "type": 6
         },
         {
           "id": "6:8177457130080836204",
@@ -132,6 +122,11 @@
           "type": 11,
           "flags": 520,
           "relationTarget": "Conversation"
+        },
+        {
+          "id": "7:4712266485203504796",
+          "name": "messageType",
+          "type": 9
         }
       ],
       "relations": []
@@ -150,7 +145,10 @@
   "retiredPropertyUids": [
     3597660049575416054,
     2104687346877848645,
-    5891295503957810608
+    5891295503957810608,
+    674548584452716297,
+    2797689069606964513,
+    3321454172349311093
   ],
   "retiredRelationUids": [],
   "version": 1

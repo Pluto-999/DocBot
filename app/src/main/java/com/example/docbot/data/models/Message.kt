@@ -10,9 +10,9 @@ import java.util.Date
 data class Message(
     @Id var id: Long = 0,
     var contents: String = "",
-    var message_type: String = "",
+    var messageType: String = "",
     var timestamp: Date = Date(),
-    var conversation_id: Long = 0
+    var conversationId: Long = 0
 ) {
     lateinit var conversation: ToOne<Conversation>
 }
