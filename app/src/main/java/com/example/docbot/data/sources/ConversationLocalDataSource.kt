@@ -29,8 +29,9 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class ConversationLocalDataSource (
+class ConversationLocalDataSource @Inject constructor(
     val conversationBox: Box<Conversation>,
     val messageBox: Box<Message>,
     val documentBox: Box<Document>,
