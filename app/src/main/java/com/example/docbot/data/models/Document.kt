@@ -14,5 +14,6 @@ data class Document(
     @Backlink(to = "document")
     lateinit var documentChunks: ToMany<DocumentChunk>
 
+    @Backlink(to = "documents")
     lateinit var conversations: ToMany<Conversation>
 }

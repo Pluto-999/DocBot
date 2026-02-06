@@ -30,7 +30,13 @@
           "type": 10
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "2:7374182474622335977",
+          "name": "documents",
+          "targetId": "3:8090260363085463481"
+        }
+      ]
     },
     {
       "id": "3:8090260363085463481",
@@ -54,13 +60,7 @@
           "type": 9
         }
       ],
-      "relations": [
-        {
-          "id": "1:5829575246405167630",
-          "name": "conversations",
-          "targetId": "1:793121249725687056"
-        }
-      ]
+      "relations": []
     },
     {
       "id": "4:6197364324365550871",
@@ -134,7 +134,7 @@
   ],
   "lastEntityId": "5:5653629595122050383",
   "lastIndexId": "2:7685588371955769514",
-  "lastRelationId": "1:5829575246405167630",
+  "lastRelationId": "2:7374182474622335977",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
@@ -150,6 +150,8 @@
     2797689069606964513,
     3321454172349311093
   ],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    5829575246405167630
+  ],
   "version": 1
 }

@@ -15,7 +15,7 @@ data class Conversation(
 ) {
     @Backlink(to = "conversation")
     lateinit var messages: ToMany<Message>
-    @Backlink(to = "conversations")
+
     lateinit var documents: ToMany<Document>
 }
 
