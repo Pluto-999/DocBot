@@ -43,6 +43,8 @@ class ConversationLocalDataSource @Inject constructor(
 //
 //    }
 
+    /*** Getting Conversations ***/
+
     fun getConversations(): Flow<List<Conversation>> {
         return conversationBox
             .query()
@@ -52,36 +54,7 @@ class ConversationLocalDataSource @Inject constructor(
     }
 
 
-    /* Updating Conversations */
-
-    fun updateConversationTitle(conversationId: Long, title: String) {
-        val conversation: Conversation = conversationBox.get(conversationId)
-        conversation.title = title
-        conversationBox.put(conversation)
-    }
-
-    fun addConversationToFavourites(conversationId: Long) {
-        val favouriteCount = conversationBox
-            .query(Conversation_.favourite.equal(true))
-            .build()
-            .count()
-        if (favouriteCount >= 10) {
-            throw IllegalStateException("Maximum of 10 favourites reached")
-        } else {
-            val conversation: Conversation = conversationBox.get(conversationId)
-            conversation.favourite = true
-            conversationBox.put(conversation)
-        }
-    }
-
-    fun removeConversationFromFavourites(conversationId: Long) {
-        val conversation: Conversation = conversationBox.get(conversationId)
-        conversation.favourite = false
-        conversationBox.put(conversation)
-    }
-
-
-    /* Sorting Conversations */
+    // Sorting Conversations
 
     fun getConversationsAlphabeticallyAscending(): Flow<List<Conversation>> {
         return conversationBox
@@ -120,7 +93,7 @@ class ConversationLocalDataSource @Inject constructor(
     }
 
 
-    /* Filtering Conversations */
+    // Filtering Conversations
 
     fun getFavouriteConversations(): Flow<List<Conversation>> {
         return conversationBox
@@ -145,8 +118,7 @@ class ConversationLocalDataSource @Inject constructor(
             .toFlow()
     }
 
-
-    /* Searching Conversations */
+    // Searching Conversations
 
     fun searchForConversation(search: String): Flow<List<Conversation>> {
         return conversationBox
@@ -156,7 +128,37 @@ class ConversationLocalDataSource @Inject constructor(
             .toFlow()
     }
 
-    /* Deleting Conversations */
+
+    /*** Updating Conversations ***/
+
+    fun updateConversationTitle(conversationId: Long, title: String) {
+        val conversation: Conversation = conversationBox.get(conversationId)
+        conversation.title = title
+        conversationBox.put(conversation)
+    }
+
+    fun addConversationToFavourites(conversationId: Long) {
+        val favouriteCount = conversationBox
+            .query(Conversation_.favourite.equal(true))
+            .build()
+            .count()
+        if (favouriteCount >= 10) {
+            throw IllegalStateException("Maximum of 10 favourites reached")
+        } else {
+            val conversation: Conversation = conversationBox.get(conversationId)
+            conversation.favourite = true
+            conversationBox.put(conversation)
+        }
+    }
+
+    fun removeConversationFromFavourites(conversationId: Long) {
+        val conversation: Conversation = conversationBox.get(conversationId)
+        conversation.favourite = false
+        conversationBox.put(conversation)
+    }
+
+
+    /*** Deleting Conversations ***/
 
     fun manuallyDeleteConversation(conversationId: Long) {
         deleteConversation(conversationId)
@@ -174,7 +176,6 @@ class ConversationLocalDataSource @Inject constructor(
             deleteConversations
         )
     }
-
 
     private fun deleteConversation(conversationId: Long) {
 
