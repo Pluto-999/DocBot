@@ -1,8 +1,5 @@
 package com.example.docbot.ui.screens.home
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.docbot.data.repositories.ConversationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,4 +32,11 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(sortMenuExpanded = newState) }
     }
 
+    fun updateTitleSort(newTitleSort: SortType) {
+        _uiState.update { it.copy(titleSort = newTitleSort) }
+    }
+
+    fun updateDateSort(newDateSort: SortType) {
+        _uiState.update { it.copy(dateSort = newDateSort) }
+    }
 }
