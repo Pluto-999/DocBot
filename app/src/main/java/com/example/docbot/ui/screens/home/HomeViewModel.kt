@@ -27,4 +27,12 @@ class HomeViewModel @Inject constructor(
         _uiState.update{ it.copy(searchQuery = newQuery) }
     }
 
+    fun toggleFilterMenu(newState: Boolean) {
+        _uiState.update { it.copy(filterMenuExpanded = newState) }
+    }
+
+    fun toggleSortMenu(newState: Boolean) {
+        _uiState.update { it.copy(sortMenuExpanded = newState) }
+    }
+
 }

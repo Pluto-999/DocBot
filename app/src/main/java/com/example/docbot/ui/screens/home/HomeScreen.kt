@@ -43,29 +43,22 @@ import com.example.docbot.ui.components.SearchBar
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel<HomeViewModel>()
 ) {
-    var filterExpanded by remember { mutableStateOf(false) }
-    var sortExpanded by remember { mutableStateOf(false) }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchQuery = uiState.searchQuery
+    val filterExpanded = uiState.filterMenuExpanded
+    val sortExpanded = uiState.sortMenuExpanded
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Conversations"
-                        )
-                    },
-                    actions = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Conversations"
+                    )
+                },
+                actions = {
+                    Box {
                         IconButton(
-                            onClick = {
-                                /* Sort */
-                                sortExpanded = !sortExpanded
-                        }
+                            onClick = { viewModel.toggleSortMenu(!sortExpanded) }
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Sort,
@@ -73,11 +66,15 @@ fun HomeScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
+                        MenuDropdown(
+                            expanded = sortExpanded,
+                            onDismiss = { viewModel.toggleSortMenu(false) }
+                        )
+                    }
+
+                    Box {
                         IconButton(
-                            onClick = {
-                                /* Filter */
-                                filterExpanded = !filterExpanded
-                            }
+                            onClick = { viewModel.toggleFilterMenu(!filterExpanded) }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.FilterAlt,
@@ -85,39 +82,45 @@ fun HomeScreen(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                    },
-                    scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
-                    modifier = Modifier
-                )
-            }
+                        MenuDropdown(
+                            expanded = filterExpanded,
+                            onDismiss = { viewModel.toggleFilterMenu(false) }
+                        )
+                    }
+                },
+//                    scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+                modifier = Modifier
+            )
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            SearchBar(
-                value = searchQuery,
-                onValueChange = {
-                    viewModel.updateSearchQuery(
-                        newQuery = it
-                    )
-                }
-            )
-            ConversationList()
-            MenuDropdown(
-                sortExpanded,
-                { sortExpanded = false }
-            )
-            MenuDropdown(
-                filterExpanded,
-                { filterExpanded = false }
-            )
+        Box {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                SearchBar(
+                    value = uiState.searchQuery,
+                    onValueChange = {
+                        viewModel.updateSearchQuery(
+                            newQuery = it
+                        )
+                    }
+                )
+                ConversationList()
+            }
+//            MenuDropdown(
+//                sortExpanded,
+//                { viewModel.toggleSortMenu(false) }
+//            )
+//            MenuDropdown(
+//                filterExpanded,
+//                { viewModel.toggleFilterMenu(false) }
+//            )
             NewConversationButton()
         }
     }
