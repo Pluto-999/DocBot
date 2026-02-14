@@ -97,7 +97,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = ({/* Create Conversation */ }),
+                onClick = { viewModel.createConversation() },
                 icon = {
                     Icon(
                         Icons.Default.Add,
@@ -127,7 +127,10 @@ fun HomeScreen(
                         )
                     }
                 )
-                ConversationList(uiState.conversations)
+                ConversationList(
+                    conversations = uiState.conversations,
+                    viewModel = viewModel
+                )
             }
         }
     }
@@ -137,7 +140,8 @@ fun HomeScreen(
 /*** List of Conversations ***/
 @Composable
 fun ConversationList(
-    conversations: List<ConversationState>
+    conversations: List<ConversationState>,
+    viewModel: HomeViewModel
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -150,6 +154,7 @@ fun ConversationList(
                 title = conversation.title,
                 date = conversation.date,
                 isFavourite = conversation.isFavourite,
+                deleteClick = { viewModel.deleteConversation(conversation.id) }
             )
         }
     }

@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 fun ConversationCard(
     title: String,
     date: String,
-    isFavourite: Boolean
+    isFavourite: Boolean,
+    deleteClick: () -> Unit
 ) {
     Card(
         onClick = {/* Open Conversation */},
@@ -73,7 +74,7 @@ fun ConversationCard(
                 )
             }
             IconButton(
-                onClick = {/* Delete Conversation */}
+                onClick = { deleteClick() }
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,

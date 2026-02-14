@@ -38,10 +38,9 @@ class ConversationLocalDataSource @Inject constructor(
     val documentChunkBox: Box<DocumentChunk>
 ) {
 
-//    fun insertConversation(conversation: Conversation) {
-//        conversationBox.put(conversation)
-//
-//    }
+    fun insertConversation() {
+        conversationBox.put(Conversation())
+    }
 
     /*** Getting Conversations ***/
 

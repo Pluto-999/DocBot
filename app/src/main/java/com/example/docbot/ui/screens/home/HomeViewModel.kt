@@ -27,6 +27,14 @@ class HomeViewModel @Inject constructor(
         getConversations()
     }
 
+    fun createConversation() {
+        conversationRepository.createConversation()
+    }
+
+    fun deleteConversation(conversationId: Long) {
+        conversationRepository.deleteConversation(conversationId)
+    }
+
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
@@ -49,7 +57,7 @@ class HomeViewModel @Inject constructor(
                         oldConversation = true
                     }
 
-                    val formattedDate = formateDate(
+                    val formattedDate = formatDate(
                         days = daysDiff,
                         hours = hoursDiff,
                         minutes = minutesDiff
@@ -57,6 +65,7 @@ class HomeViewModel @Inject constructor(
 
                     uiConversations.add(
                         ConversationState(
+                            id = conversation.id,
                             title = conversation.title,
                             isFavourite = conversation.favourite,
                             date = formattedDate,
@@ -69,8 +78,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun formateDate(days: Long, hours: Long, minutes: Long): String {
-
+    private fun formatDate(days: Long, hours: Long, minutes: Long): String {
         if (days >= 1) {
             return "$days days ago"
         }

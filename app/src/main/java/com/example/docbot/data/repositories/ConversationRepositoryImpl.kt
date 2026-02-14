@@ -9,23 +9,23 @@ class ConversationRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource
 ): ConversationRepository {
     override fun createConversation() {
-        TODO("Not yet implemented")
+        conversationLocalDataSource.insertConversation()
     }
 
     override fun deleteConversation(conversationId: Long) {
-        TODO("Not yet implemented")
+        conversationLocalDataSource.manuallyDeleteConversation(conversationId)
     }
 
     override fun getConversations(): Flow<List<Conversation>> {
-        TODO("Not yet implemented")
+        return conversationLocalDataSource.getConversations()
     }
 
-    override fun updateTitle(conversationId: Long, title: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
-        TODO("Not yet implemented")
-    }
+//    override fun updateTitle(conversationId: Long, title: String) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
+//        TODO("Not yet implemented")
+//    }
 
 }

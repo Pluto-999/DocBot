@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 @Entity
 data class Conversation(
     @Id var id: Long = 0,
-    var title: String = "",
+    var title: String = "Untitled",
     var favourite: Boolean = false,
     @Convert(converter = LocalDateTimeConverter::class, dbType = Long::class)
-    var latestMessage: LocalDateTime? = null
+    var latestMessage: LocalDateTime = LocalDateTime.now()
 ) {
     @Backlink(to = "conversation")
     lateinit var messages: ToMany<Message>
