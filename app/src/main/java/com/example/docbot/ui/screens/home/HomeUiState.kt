@@ -14,7 +14,9 @@ data class HomeUiState (
 )
 
 data class ConversationState(
-    val title: String,
-    val isFavourite: Boolean = false
+    val title: String = "",
+    val isFavourite: Boolean = false,
+    val date: String = "",
+    val deleteSoon: Boolean = true
 )
 

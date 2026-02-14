@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
@@ -31,13 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.docbot.ui.components.ConversationCard
-import com.example.docbot.ui.components.MenuDropdown
-import com.example.docbot.ui.components.SearchBar
+import com.example.docbot.ui.screens.home.components.AppBar
+import com.example.docbot.ui.screens.home.components.ConversationCard
+import com.example.docbot.ui.screens.home.components.MenuDropdown
+import com.example.docbot.ui.screens.home.components.SearchBar
 
-@OptIn(
-    ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel<HomeViewModel>()
@@ -48,121 +48,165 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Conversations"
+
+            AppBar(
+                sortIconOnClick = { viewModel.toggleSortMenu(!sortExpanded) },
+                sortMenuExpanded = sortExpanded,
+                sortMenuDismiss = { viewModel.toggleSortMenu(false) },
+                filterIconOnClick = { viewModel.toggleFilterMenu(!filterExpanded) },
+                filterMenuExpanded = filterExpanded,
+                filterMenuDismiss = { viewModel.toggleFilterMenu(false) },
+                titleOnClick = {
+                    if (uiState.titleSort == SortType.ASC) {
+                        viewModel.updateTitleSort(SortType.DESC)
+                    } else {
+                        viewModel.updateTitleSort(SortType.ASC)
+                    }
+                },
+                titleIcon = {
+                    Icon(
+                        imageVector =
+                            if (uiState.titleSort == SortType.ASC) {
+                                Icons.Default.ArrowUpward
+                            } else {
+                                Icons.Default.ArrowDownward
+                            },
+                        contentDescription = "Sort Title"
                     )
                 },
-                actions = {
-                    Box {
-                        IconButton(
-                            onClick = { viewModel.toggleSortMenu(!sortExpanded) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = "Sort",
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        MenuDropdown(
-                            expanded = sortExpanded,
-                            onDismiss = { viewModel.toggleSortMenu(false) },
-                            menuContents = {
-                                DropdownMenuItem(
-                                    text = { Text("Title") },
-                                    leadingIcon = {
-                                        if (uiState.titleSort == SortType.ASC) {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowUpward,
-                                                contentDescription = "Sort Title Ascending"
-                                            )
-                                        }
-                                        else {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowDownward,
-                                                contentDescription = "Sort Title Descending"
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        if (uiState.titleSort == SortType.ASC) {
-                                            viewModel.updateTitleSort(SortType.DESC)
-                                        }
-                                        else {
-                                            viewModel.updateTitleSort(SortType.ASC)
-                                        }
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Date") },
-                                    leadingIcon = {
-                                        if (uiState.dateSort == SortType.ASC) {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowUpward,
-                                                contentDescription = "Sort Date Ascending"
-                                            )
-                                        }
-                                        else {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowDownward,
-                                                contentDescription = "Sort Date Descending"
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        if (uiState.dateSort == SortType.ASC) {
-                                            viewModel.updateDateSort(SortType.DESC)
-                                        }
-                                        else {
-                                            viewModel.updateDateSort(SortType.ASC)
-                                        }
-                                    }
-                                )
-                            }
-                        )
+                dateOnClick = {
+                    if (uiState.dateSort == SortType.ASC) {
+                        viewModel.updateDateSort(SortType.DESC)
                     }
-
-                    Box {
-                        IconButton(
-                            onClick = { viewModel.toggleFilterMenu(!filterExpanded) }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.FilterAlt,
-                                contentDescription = "Filter",
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        MenuDropdown(
-                            expanded = filterExpanded,
-                            onDismiss = { viewModel.toggleFilterMenu(false) },
-                            menuContents = {
-                                DropdownMenuItem(
-                                    text = { Text("Favourites") },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Favorite,
-                                            contentDescription = "Favourites"
-                                        )
-                                    },
-                                    onClick = {/* Do something */}
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Soon to be deleted") },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Soon to be deleted"
-                                        )
-                                    },
-                                    onClick = {/* Do something */}
-                                )
-                            }
-                        )
+                    else {
+                        viewModel.updateDateSort(SortType.ASC)
                     }
                 },
-                modifier = Modifier
+                dateIcon = {
+                    Icon(
+                        imageVector =
+                            if (uiState.dateSort == SortType.ASC) {
+                                Icons.Default.ArrowUpward
+                            }
+                            else {
+                                Icons.Default.ArrowDownward
+                            },
+                        contentDescription = "Sort Date"
+                    )
+                }
             )
+
+//            TopAppBar(
+//                title = {
+//                    Text(
+//                        text = "Conversations"
+//                    )
+//                },
+//                actions = {
+//                    Box {
+//                        IconButton(
+//                            onClick = { viewModel.toggleSortMenu(!sortExpanded) }
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.AutoMirrored.Filled.Sort,
+//                                contentDescription = "Sort",
+//                                modifier = Modifier.size(28.dp)
+//                            )
+//                        }
+//                        MenuDropdown(
+//                            expanded = sortExpanded,
+//                            onDismiss = { viewModel.toggleSortMenu(false) },
+//                            menuContents = {
+//                                DropdownMenuItem(
+//                                    text = { Text("Title") },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            imageVector =
+//                                                if (uiState.titleSort == SortType.ASC) {
+//                                                    Icons.Default.ArrowUpward
+//                                                }
+//                                                else {
+//                                                    Icons.Default.ArrowDownward
+//                                                },
+//                                            contentDescription = "Sort Title"
+//                                        )
+//                                    },
+//                                    onClick = {
+//                                        if (uiState.titleSort == SortType.ASC) {
+//                                            viewModel.updateTitleSort(SortType.DESC)
+//                                        }
+//                                        else {
+//                                            viewModel.updateTitleSort(SortType.ASC)
+//                                        }
+//                                    }
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Date") },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            imageVector =
+//                                                if (uiState.dateSort == SortType.ASC) {
+//                                                    Icons.Default.ArrowUpward
+//                                                }
+//                                                else {
+//                                                    Icons.Default.ArrowDownward
+//                                                },
+//                                            contentDescription = "Sort Date"
+//                                        )
+//                                    },
+//                                    onClick = {
+//                                        if (uiState.dateSort == SortType.ASC) {
+//                                            viewModel.updateDateSort(SortType.DESC)
+//                                        }
+//                                        else {
+//                                            viewModel.updateDateSort(SortType.ASC)
+//                                        }
+//                                    }
+//                                )
+//                            }
+//                        )
+//                    }
+//
+//                    Box {
+//                        IconButton(
+//                            onClick = { viewModel.toggleFilterMenu(!filterExpanded) }
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Default.FilterAlt,
+//                                contentDescription = "Filter",
+//                                modifier = Modifier.size(28.dp)
+//                            )
+//                        }
+//                        MenuDropdown(
+//                            expanded = filterExpanded,
+//                            onDismiss = { viewModel.toggleFilterMenu(false) },
+//                            menuContents = {
+//                                DropdownMenuItem(
+//                                    text = { Text("Favourites") },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            imageVector = Icons.Default.Favorite,
+//                                            contentDescription = "Favourites"
+//                                        )
+//                                    },
+//                                    onClick = {/* Do something */}
+//                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("Soon to be deleted") },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            imageVector = Icons.Default.Delete,
+//                                            contentDescription = "Soon to be deleted"
+//                                        )
+//                                    },
+//                                    onClick = {/* Do something */}
+//                                )
+//                            }
+//                        )
+//                    }
+//                },
+//                modifier = Modifier
+//            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -196,7 +240,7 @@ fun HomeScreen(
                         )
                     }
                 )
-                ConversationList()
+                ConversationList(uiState.conversations)
             }
         }
     }
@@ -205,17 +249,21 @@ fun HomeScreen(
 
 /*** List of Conversations ***/
 @Composable
-fun ConversationList() {
+fun ConversationList(
+    conversations: List<ConversationState>
+) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        items(100) { index ->
-            ConversationCard(index)
+        items(conversations) { conversation ->
+            ConversationCard(
+                title = conversation.title,
+                date = conversation.date,
+                isFavourite = conversation.isFavourite,
+            )
         }
     }
 }
-
-

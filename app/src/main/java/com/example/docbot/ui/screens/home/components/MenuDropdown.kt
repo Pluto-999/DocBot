@@ -1,4 +1,4 @@
-package com.example.docbot.ui.components
+package com.example.docbot.ui.screens.home.components
 
 
 import androidx.compose.material3.DropdownMenu

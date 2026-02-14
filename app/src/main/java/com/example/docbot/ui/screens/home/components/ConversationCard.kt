@@ -1,4 +1,4 @@
-package com.example.docbot.ui.components
+package com.example.docbot.ui.screens.home.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -22,7 +23,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ConversationCard(
-    index: Int
+    title: String,
+    date: String,
+    isFavourite: Boolean
 ) {
     Card(
         onClick = {/* Open Conversation */},
@@ -40,11 +43,18 @@ fun ConversationCard(
                 onClick = {/* Favourite Conversation */ }
             ) {
                 Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
+                    imageVector =
+                        if (isFavourite) {
+                            Icons.Default.Favorite
+                        }
+                        else {
+                            Icons.Default.FavoriteBorder
+                        },
                     contentDescription = "Favourite",
                     modifier = Modifier.size(28.dp)
                 )
             }
+
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -52,13 +62,13 @@ fun ConversationCard(
                     .padding(vertical = 4.dp)
             ) {
                 Text(
-                    "Item: $index",
+                    text = title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    "Some random date",
+                    text = date,
                     style = MaterialTheme.typography.labelSmall
                 )
             }
