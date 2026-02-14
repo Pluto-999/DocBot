@@ -24,8 +24,13 @@ class ConversationRepositoryImpl @Inject constructor(
 //        TODO("Not yet implemented")
 //    }
 //
-//    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
-//        TODO("Not yet implemented")
-//    }
+    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
+        if (isFavourite) {
+            conversationLocalDataSource.removeConversationFromFavourites(conversationId)
+        }
+        else {
+            conversationLocalDataSource.addConversationToFavourites(conversationId)
+        }
+    }
 
 }

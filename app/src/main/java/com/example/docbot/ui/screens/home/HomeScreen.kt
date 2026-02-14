@@ -6,25 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.docbot.ui.screens.home.components.AppBar
 import com.example.docbot.ui.screens.home.components.ConversationCard
-import com.example.docbot.ui.screens.home.components.MenuDropdown
 import com.example.docbot.ui.screens.home.components.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,6 +145,7 @@ fun ConversationList(
                 title = conversation.title,
                 date = conversation.date,
                 isFavourite = conversation.isFavourite,
+                favouriteClick = { viewModel.toggleFavourite(conversation.id, conversation.isFavourite) },
                 deleteClick = { viewModel.deleteConversation(conversation.id) }
             )
         }

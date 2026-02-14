@@ -45,11 +45,7 @@ class ConversationLocalDataSource @Inject constructor(
     /*** Getting Conversations ***/
 
     fun getConversations(): Flow<List<Conversation>> {
-        return conversationBox
-            .query()
-            .build()
-            .subscribe()
-            .toFlow()
+        return getConversationsDateDescending()
     }
 
 

@@ -26,6 +26,7 @@ fun ConversationCard(
     title: String,
     date: String,
     isFavourite: Boolean,
+    favouriteClick: () -> Unit,
     deleteClick: () -> Unit
 ) {
     Card(
@@ -41,7 +42,7 @@ fun ConversationCard(
                 .padding(vertical = 8.dp)
         ) {
             IconButton(
-                onClick = {/* Favourite Conversation */ }
+                onClick = { favouriteClick() }
             ) {
                 Icon(
                     imageVector =

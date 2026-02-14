@@ -91,6 +91,10 @@ class HomeViewModel @Inject constructor(
         return "$minutes minutes ago"
     }
 
+    fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
+        conversationRepository.toggleFavourite(conversationId, isFavourite)
+    }
+
     fun updateSearchQuery(newQuery: String) {
         _uiState.update{ it.copy(searchQuery = newQuery) }
     }
