@@ -48,7 +48,6 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-
             AppBar(
                 sortIconOnClick = { viewModel.toggleSortMenu(!sortExpanded) },
                 sortMenuExpanded = sortExpanded,
@@ -95,118 +94,6 @@ fun HomeScreen(
                     )
                 }
             )
-
-//            TopAppBar(
-//                title = {
-//                    Text(
-//                        text = "Conversations"
-//                    )
-//                },
-//                actions = {
-//                    Box {
-//                        IconButton(
-//                            onClick = { viewModel.toggleSortMenu(!sortExpanded) }
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.AutoMirrored.Filled.Sort,
-//                                contentDescription = "Sort",
-//                                modifier = Modifier.size(28.dp)
-//                            )
-//                        }
-//                        MenuDropdown(
-//                            expanded = sortExpanded,
-//                            onDismiss = { viewModel.toggleSortMenu(false) },
-//                            menuContents = {
-//                                DropdownMenuItem(
-//                                    text = { Text("Title") },
-//                                    leadingIcon = {
-//                                        Icon(
-//                                            imageVector =
-//                                                if (uiState.titleSort == SortType.ASC) {
-//                                                    Icons.Default.ArrowUpward
-//                                                }
-//                                                else {
-//                                                    Icons.Default.ArrowDownward
-//                                                },
-//                                            contentDescription = "Sort Title"
-//                                        )
-//                                    },
-//                                    onClick = {
-//                                        if (uiState.titleSort == SortType.ASC) {
-//                                            viewModel.updateTitleSort(SortType.DESC)
-//                                        }
-//                                        else {
-//                                            viewModel.updateTitleSort(SortType.ASC)
-//                                        }
-//                                    }
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Date") },
-//                                    leadingIcon = {
-//                                        Icon(
-//                                            imageVector =
-//                                                if (uiState.dateSort == SortType.ASC) {
-//                                                    Icons.Default.ArrowUpward
-//                                                }
-//                                                else {
-//                                                    Icons.Default.ArrowDownward
-//                                                },
-//                                            contentDescription = "Sort Date"
-//                                        )
-//                                    },
-//                                    onClick = {
-//                                        if (uiState.dateSort == SortType.ASC) {
-//                                            viewModel.updateDateSort(SortType.DESC)
-//                                        }
-//                                        else {
-//                                            viewModel.updateDateSort(SortType.ASC)
-//                                        }
-//                                    }
-//                                )
-//                            }
-//                        )
-//                    }
-//
-//                    Box {
-//                        IconButton(
-//                            onClick = { viewModel.toggleFilterMenu(!filterExpanded) }
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.Default.FilterAlt,
-//                                contentDescription = "Filter",
-//                                modifier = Modifier.size(28.dp)
-//                            )
-//                        }
-//                        MenuDropdown(
-//                            expanded = filterExpanded,
-//                            onDismiss = { viewModel.toggleFilterMenu(false) },
-//                            menuContents = {
-//                                DropdownMenuItem(
-//                                    text = { Text("Favourites") },
-//                                    leadingIcon = {
-//                                        Icon(
-//                                            imageVector = Icons.Default.Favorite,
-//                                            contentDescription = "Favourites"
-//                                        )
-//                                    },
-//                                    onClick = {/* Do something */}
-//                                )
-//                                DropdownMenuItem(
-//                                    text = { Text("Soon to be deleted") },
-//                                    leadingIcon = {
-//                                        Icon(
-//                                            imageVector = Icons.Default.Delete,
-//                                            contentDescription = "Soon to be deleted"
-//                                        )
-//                                    },
-//                                    onClick = {/* Do something */}
-//                                )
-//                            }
-//                        )
-//                    }
-//                },
-//                modifier = Modifier
-//            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(

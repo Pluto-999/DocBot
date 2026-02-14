@@ -23,10 +23,14 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    init {
+        getConversations()
+    }
+
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
-    fun getConversations() {
+    private fun getConversations() {
         viewModelScope.launch {
             conversationRepository.getConversations().collect { conversations ->
                 val uiConversations = mutableListOf<ConversationState>()
