@@ -38,9 +38,11 @@ class HomeViewModel @Inject constructor(
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
-    private fun getConversations() {
+    fun getConversations(
+        type: GetConversationType = GetConversationType.NONE
+    ) {
         viewModelScope.launch {
-            conversationRepository.getConversations().collect { conversations ->
+            conversationRepository.getConversations(type).collect { conversations ->
                 val uiConversations = mutableListOf<ConversationState>()
                 val currentDateTime = LocalDateTime.now()
                 for (conversation in conversations) {
@@ -79,6 +81,9 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun formatDate(days: Long, hours: Long, minutes: Long): String {
+        if (days == 1.toLong()) {
+            return "$days day ago"
+        }
         if (days >= 1) {
             return "$days days ago"
         }
@@ -92,7 +97,15 @@ class HomeViewModel @Inject constructor(
     }
 
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
-        conversationRepository.toggleFavourite(conversationId, isFavourite)
+        val successfulToggle = conversationRepository.toggleFavourite(conversationId, isFavourite)
+
+        if (!successfulToggle) {
+            viewModelScope.launch {
+                _uiState.value.snackbarHostState.showSnackbar(
+                    "You can only have up to 10 favourite conversations"
+                )
+            }
+        }
     }
 
     fun updateSearchQuery(newQuery: String) {
@@ -114,4 +127,14 @@ class HomeViewModel @Inject constructor(
     fun updateDateSort(newDateSort: SortType) {
         _uiState.update { it.copy(dateSort = newDateSort) }
     }
+}
+
+enum class GetConversationType {
+    DATE_ASC,
+    DATE_DESC,
+    TITLE_ASC,
+    TITLE_DESC,
+    FAVOURITES,
+    DELETE_SOON,
+    NONE
 }

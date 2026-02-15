@@ -1,12 +1,9 @@
 package com.example.docbot.ui.screens.home.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FilterAlt
@@ -18,10 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.docbot.ui.screens.home.HomeViewModel
-import com.example.docbot.ui.screens.home.SortType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +30,8 @@ fun AppBar(
     titleIcon: @Composable () -> Unit,
     dateOnClick: () -> Unit,
     dateIcon: @Composable () -> Unit,
-
+    favouriteOnClick: () -> Unit,
+    deleteSoonOnClick: () -> Unit
     ) {
     TopAppBar(
         title = {
@@ -95,7 +90,7 @@ fun AppBar(
                                     contentDescription = "Favourites"
                                 )
                             },
-                            onClick = {/* Do something */}
+                            onClick = { favouriteOnClick() }
                         )
                         DropdownMenuItem(
                             text = { Text("Soon to be deleted") },
@@ -105,7 +100,7 @@ fun AppBar(
                                     contentDescription = "Soon to be deleted"
                                 )
                             },
-                            onClick = {/* Do something */}
+                            onClick = { deleteSoonOnClick() }
                         )
                     }
                 )

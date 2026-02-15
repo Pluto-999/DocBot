@@ -2,6 +2,7 @@ package com.example.docbot.data.repositories
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.sources.ConversationLocalDataSource
+import com.example.docbot.ui.screens.home.GetConversationType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -16,21 +17,36 @@ class ConversationRepositoryImpl @Inject constructor(
         conversationLocalDataSource.manuallyDeleteConversation(conversationId)
     }
 
-    override fun getConversations(): Flow<List<Conversation>> {
-        return conversationLocalDataSource.getConversations()
+    override fun getConversations(type: GetConversationType): Flow<List<Conversation>> {
+        return when (type) {
+            GetConversationType.DATE_ASC -> conversationLocalDataSource.getConversationsDateAscending()
+            GetConversationType.DATE_DESC -> conversationLocalDataSource.getConversationsDateDescending()
+            GetConversationType.TITLE_ASC -> conversationLocalDataSource.getConversationsAlphabeticallyAscending()
+            GetConversationType.TITLE_DESC -> conversationLocalDataSource.getConversationsAlphabeticallyDescending()
+            GetConversationType.FAVOURITES -> conversationLocalDataSource.getFavouriteConversations()
+            GetConversationType.DELETE_SOON -> conversationLocalDataSource.getSoonToBeDeletedConversations()
+            GetConversationType.NONE -> conversationLocalDataSource.getConversations()
+        }
     }
 
 //    override fun updateTitle(conversationId: Long, title: String) {
 //        TODO("Not yet implemented")
 //    }
 //
-    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean) {
+
+    // returns true if the toggle was successful and false otherwise
+    override fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean {
         if (isFavourite) {
             conversationLocalDataSource.removeConversationFromFavourites(conversationId)
         }
         else {
-            conversationLocalDataSource.addConversationToFavourites(conversationId)
+            try {
+                conversationLocalDataSource.addConversationToFavourites(conversationId)
+            }
+            catch (exception: IllegalStateException) {
+                return false
+            }
         }
+        return true
     }
-
 }

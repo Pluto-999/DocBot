@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,8 +50,10 @@ fun HomeScreen(
                 titleOnClick = {
                     if (uiState.titleSort == SortType.ASC) {
                         viewModel.updateTitleSort(SortType.DESC)
+                        viewModel.getConversations(GetConversationType.TITLE_DESC)
                     } else {
                         viewModel.updateTitleSort(SortType.ASC)
+                        viewModel.getConversations(GetConversationType.TITLE_ASC)
                     }
                 },
                 titleIcon = {
@@ -67,9 +70,11 @@ fun HomeScreen(
                 dateOnClick = {
                     if (uiState.dateSort == SortType.ASC) {
                         viewModel.updateDateSort(SortType.DESC)
+                        viewModel.getConversations(GetConversationType.DATE_DESC)
                     }
                     else {
                         viewModel.updateDateSort(SortType.ASC)
+                        viewModel.getConversations(GetConversationType.DATE_ASC)
                     }
                 },
                 dateIcon = {
@@ -83,6 +88,12 @@ fun HomeScreen(
                             },
                         contentDescription = "Sort Date"
                     )
+                },
+                favouriteOnClick = {
+                    viewModel.getConversations(GetConversationType.FAVOURITES)
+                },
+                deleteSoonOnClick = {
+                    viewModel.getConversations(GetConversationType.DELETE_SOON)
                 }
             )
         },
@@ -98,6 +109,9 @@ fun HomeScreen(
                     Text("New Conversation")
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = uiState.snackbarHostState)
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
