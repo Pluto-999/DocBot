@@ -29,6 +29,10 @@ class ConversationRepositoryImpl @Inject constructor(
         }
     }
 
+//    override fun searchForConversation(query: String): Flow<List<Conversation>> {
+//        return conversationLocalDataSource.searchForConversation(query)
+//    }
+
 //    override fun updateTitle(conversationId: Long, title: String) {
 //        TODO("Not yet implemented")
 //    }

@@ -1,7 +1,6 @@
 package com.example.docbot.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,15 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.docbot.ui.screens.home.components.AppBar
 import com.example.docbot.ui.screens.home.components.ConversationCard
+import com.example.docbot.ui.screens.home.components.NewConversationButton
 import com.example.docbot.ui.screens.home.components.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,46 +94,32 @@ fun HomeScreen(
                 }
             )
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { viewModel.createConversation() },
-                icon = {
-                    Icon(
-                        Icons.Default.Add,
-                        "Create Conversation")
-                },
-                text = {
-                    Text("New Conversation")
-                }
-            )
-        },
         snackbarHost = {
             SnackbarHost(hostState = uiState.snackbarHostState)
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-
-        Box {
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                SearchBar(
-                    value = uiState.searchQuery,
-                    onValueChange = {
-                        viewModel.updateSearchQuery(
-                            newQuery = it
-                        )
-                    }
-                )
-                ConversationList(
-                    conversations = uiState.conversations,
-                    viewModel = viewModel
-                )
-            }
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            SearchBar(
+                value = uiState.searchQuery,
+                onValueChange = {
+                    viewModel.updateSearchQuery(
+                        newQuery = it
+                    )
+                }
+            )
+            ConversationList(
+                conversations = uiState.conversations,
+                viewModel = viewModel,
+                modifier = Modifier.weight(1f)
+            )
+            NewConversationButton(viewModel)
         }
     }
 }
@@ -146,13 +129,15 @@ fun HomeScreen(
 @Composable
 fun ConversationList(
     conversations: List<ConversationState>,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
     ) {
         items(conversations) { conversation ->
             ConversationCard(

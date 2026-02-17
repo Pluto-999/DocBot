@@ -136,5 +136,11 @@ enum class GetConversationType {
     TITLE_DESC,
     FAVOURITES,
     DELETE_SOON,
+//    SEARCH,
     NONE
 }
+
+//sealed class GetConversationTypes {
+//    DATE_ASC,
+//
+//}

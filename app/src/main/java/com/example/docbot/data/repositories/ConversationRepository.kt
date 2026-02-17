@@ -8,6 +8,7 @@ interface ConversationRepository {
     fun createConversation()
     fun deleteConversation(conversationId: Long)
     fun getConversations(type: GetConversationType): Flow<List<Conversation>>
+//    fun searchForConversation(query: String): Flow<List<Conversation>>
 //    fun updateTitle(conversationId: Long, title: String)
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean
 

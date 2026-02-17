@@ -3,8 +3,6 @@ package com.example.docbot.data.sources
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ListenableWorker
-import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -13,9 +11,7 @@ import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Conversation_
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
-import com.example.docbot.data.models.Document_
 import com.example.docbot.data.models.Message
-import com.google.common.util.concurrent.ListenableFuture
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.objectbox.Box
