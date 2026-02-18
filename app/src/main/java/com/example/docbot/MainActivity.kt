@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.docbot.data.ObjectBox
-import com.example.docbot.ui.screens.home.HomeScreen
+import com.example.docbot.ui.navigation.Navigation
 import com.example.docbot.ui.theme.DocBotTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DocBotTheme {
-                HomeScreen()
+                Navigation()
             }
         }
     }

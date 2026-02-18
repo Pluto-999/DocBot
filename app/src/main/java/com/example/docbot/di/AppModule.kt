@@ -7,6 +7,8 @@ import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.repositories.ConversationRepository
 import com.example.docbot.data.repositories.ConversationRepositoryImpl
+import com.example.docbot.data.repositories.MessageRepository
+import com.example.docbot.data.repositories.MessageRepositoryImpl
 import com.example.docbot.data.sources.ConversationLocalDataSource
 import dagger.Module
 import dagger.Provides
@@ -66,5 +68,11 @@ object AppModule {
         conversationLocalDataSource: ConversationLocalDataSource
     ): ConversationRepository {
         return ConversationRepositoryImpl(conversationLocalDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMessageRepository(): MessageRepository {
+        return MessageRepositoryImpl()
     }
 }

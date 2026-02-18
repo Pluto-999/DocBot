@@ -29,7 +29,8 @@ import com.example.docbot.ui.screens.home.components.SearchBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel<HomeViewModel>()
+    viewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
+    onConversationNavigate: (id: Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val filterExpanded = uiState.filterMenuExpanded
@@ -117,6 +118,7 @@ fun HomeScreen(
             ConversationList(
                 conversations = uiState.conversations,
                 viewModel = viewModel,
+                onConversationClick = onConversationNavigate,
                 modifier = Modifier.weight(1f)
             )
             NewConversationButton(viewModel)
@@ -130,6 +132,7 @@ fun HomeScreen(
 fun ConversationList(
     conversations: List<ConversationState>,
     viewModel: HomeViewModel,
+    onConversationClick: (id: Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -144,6 +147,7 @@ fun ConversationList(
                 title = conversation.title,
                 date = conversation.date,
                 isFavourite = conversation.isFavourite,
+                openConversation = { onConversationClick(conversation.id) },
                 favouriteClick = { viewModel.toggleFavourite(conversation.id, conversation.isFavourite) },
                 deleteClick = { viewModel.deleteConversation(conversation.id) }
             )

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.objectbox)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -57,7 +58,6 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-//    implementation(libs.androidx.compose.material3)
     implementation(libs.hilt.android)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.common)
@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.json)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

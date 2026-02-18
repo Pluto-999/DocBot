@@ -26,11 +26,12 @@ fun ConversationCard(
     title: String,
     date: String,
     isFavourite: Boolean,
+    openConversation: () -> Unit,
     favouriteClick: () -> Unit,
     deleteClick: () -> Unit
 ) {
     Card(
-        onClick = {/* Open Conversation */},
+        onClick = { openConversation() },
         modifier = Modifier
             .fillMaxSize()
 
