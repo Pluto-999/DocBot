@@ -9,7 +9,9 @@ interface ConversationRepository {
     fun deleteConversation(conversationId: Long)
     fun getConversations(type: GetConversationType): Flow<List<Conversation>>
 //    fun searchForConversation(query: String): Flow<List<Conversation>>
-//    fun updateTitle(conversationId: Long, title: String)
+    fun updateTitle(conversationId: Long, title: String)
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean
 
+    // for chat page
+    fun getConversationTitle(id: Long): String?
 }

@@ -120,6 +120,16 @@ class ConversationLocalDataSource @Inject constructor(
     }
 
 
+    // Get title from id
+
+    fun getConversationTitleFromId(id: Long): String? {
+        val conversation = conversationBox
+            .query(Conversation_.id equal id)
+            .build()
+            .findUnique()
+        return conversation?.title
+    }
+
     /*** Updating Conversations ***/
 
     fun updateConversationTitle(conversationId: Long, title: String) {

@@ -33,9 +33,9 @@ class ConversationRepositoryImpl @Inject constructor(
 //        return conversationLocalDataSource.searchForConversation(query)
 //    }
 
-//    override fun updateTitle(conversationId: Long, title: String) {
-//        TODO("Not yet implemented")
-//    }
+    override fun updateTitle(conversationId: Long, title: String) {
+        conversationLocalDataSource.updateConversationTitle(conversationId, title)
+    }
 //
 
     // returns true if the toggle was successful and false otherwise
@@ -52,5 +52,9 @@ class ConversationRepositoryImpl @Inject constructor(
             }
         }
         return true
+    }
+
+    override fun getConversationTitle(id: Long): String? {
+        return conversationLocalDataSource.getConversationTitleFromId(id)
     }
 }

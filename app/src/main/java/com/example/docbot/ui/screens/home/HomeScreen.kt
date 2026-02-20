@@ -110,9 +110,7 @@ fun HomeScreen(
             SearchBar(
                 value = uiState.searchQuery,
                 onValueChange = {
-                    viewModel.updateSearchQuery(
-                        newQuery = it
-                    )
+                    viewModel.updateSearchQuery(newQuery = it)
                 }
             )
             ConversationList(
