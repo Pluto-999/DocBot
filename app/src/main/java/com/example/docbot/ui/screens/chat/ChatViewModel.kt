@@ -1,7 +1,9 @@
 package com.example.docbot.ui.screens.chat
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
+import com.example.docbot.data.repositories.MessageRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 @AssistedFactory
@@ -20,6 +23,7 @@ interface ChatViewModelFactory {
 @HiltViewModel(assistedFactory = ChatViewModelFactory::class)
 class ChatViewModel @AssistedInject constructor(
     private val conversationRepository: ConversationRepository,
+    private val messageRepository: MessageRepository,
     @Assisted val conversationId: Long
 ): ViewModel() {
 
@@ -30,6 +34,25 @@ class ChatViewModel @AssistedInject constructor(
 
     init {
         getConversationTitle()
+        getMessages()
+    }
+
+    fun getMessages() {
+        // we must use viewModel coroutine otherwise we can't use .collect !
+        viewModelScope.launch {
+            messageRepository.getMessages(conversationId).collect { messages ->
+                val uiMessages = mutableListOf<MessageState>()
+                for (message in messages) {
+                    uiMessages.add(
+                        MessageState(
+                            contents = message.contents,
+                            messageType = message.messageType
+                        )
+                    )
+                }
+                _uiState.update { it.copy(messages = uiMessages) }
+            }
+        }
     }
 
     private fun getConversationTitle() {
@@ -44,6 +67,15 @@ class ChatViewModel @AssistedInject constructor(
     fun updateConversationTitle(newTitle: String) {
         _uiState.update { it.copy(title = newTitle) }
         conversationRepository.updateTitle(conversationId, newTitle)
+    }
+
+    fun createMessage() {
+        messageRepository.addMessage(conversationId, _uiState.value.currentMessage)
+        _uiState.update { it.copy(currentMessage = "") }
+    }
+
+    fun updateCurrentMessage(newMessage: String) {
+        _uiState.update { it.copy(currentMessage = newMessage) }
     }
 
 }

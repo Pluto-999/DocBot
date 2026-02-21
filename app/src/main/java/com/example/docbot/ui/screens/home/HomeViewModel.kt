@@ -41,6 +41,7 @@ class HomeViewModel @Inject constructor(
     fun getConversations(
         type: GetConversationType = GetConversationType.NONE
     ) {
+        // we must use viewModel coroutine otherwise we can't use .collect !
         viewModelScope.launch {
             conversationRepository.getConversations(type).collect { conversations ->
                 val uiConversations = mutableListOf<ConversationState>()

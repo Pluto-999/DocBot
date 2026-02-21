@@ -28,10 +28,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ConversationLocalDataSource @Inject constructor(
-    val conversationBox: Box<Conversation>,
-    val messageBox: Box<Message>,
-    val documentBox: Box<Document>,
-    val documentChunkBox: Box<DocumentChunk>
+    private val conversationBox: Box<Conversation>,
+    private val messageBox: Box<Message>,
+    private val documentBox: Box<Document>,
+    private val documentChunkBox: Box<DocumentChunk>
 ) {
 
     fun insertConversation() {

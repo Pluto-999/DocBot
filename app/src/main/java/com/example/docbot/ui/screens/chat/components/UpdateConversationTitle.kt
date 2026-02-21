@@ -14,9 +14,9 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun UpdateConversationTitle(
-    onDismissRequest: () -> Unit,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    onDismissRequest: () -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismissRequest
@@ -37,6 +37,7 @@ fun UpdateConversationTitle(
                 keyboardActions = KeyboardActions(
                     onDone = { onDismissRequest() }
                 ),
+                singleLine = true,
                 modifier = Modifier.padding(
                     top = 8.dp,
                     bottom = 16.dp,

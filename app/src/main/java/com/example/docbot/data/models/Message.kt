@@ -13,7 +13,7 @@ data class Message(
     var contents: String = "",
     var messageType: String = "",
     @Convert(converter = LocalDateTimeConverter::class, dbType = Long::class)
-    var timestamp: LocalDateTime? = null,
+    var timestamp: LocalDateTime = LocalDateTime.now(),
     var conversationId: Long = 0
 ) {
     lateinit var conversation: ToOne<Conversation>

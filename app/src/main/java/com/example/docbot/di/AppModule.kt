@@ -10,6 +10,7 @@ import com.example.docbot.data.repositories.ConversationRepositoryImpl
 import com.example.docbot.data.repositories.MessageRepository
 import com.example.docbot.data.repositories.MessageRepositoryImpl
 import com.example.docbot.data.sources.ConversationLocalDataSource
+import com.example.docbot.data.sources.MessageLocalDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,7 +73,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMessageRepository(): MessageRepository {
-        return MessageRepositoryImpl()
+    fun provideMessageRepository(
+        messageLocalDataSource: MessageLocalDataSource
+    ): MessageRepository {
+        return MessageRepositoryImpl(messageLocalDataSource)
     }
 }
