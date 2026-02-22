@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.common)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)
