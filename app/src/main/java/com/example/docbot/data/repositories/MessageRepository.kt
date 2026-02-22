@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
     fun getMessages(conversationId: Long): Flow<List<Message>>
-    fun addMessage(conversationId: Long, message: String)
+    fun sendMessage(conversationId: Long, message: String)
 }

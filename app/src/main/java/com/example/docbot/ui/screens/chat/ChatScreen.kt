@@ -79,7 +79,7 @@ fun ChatScreen(
             MessageTextBox(
                 value = uiState.currentMessage,
                 onValueChange = { viewModel.updateCurrentMessage(newMessage = it) },
-                createMessage = { viewModel.createMessage() }
+                createMessage = { viewModel.sendMessage() }
             )
         }
 

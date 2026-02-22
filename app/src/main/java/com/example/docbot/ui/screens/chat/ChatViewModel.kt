@@ -69,8 +69,8 @@ class ChatViewModel @AssistedInject constructor(
         conversationRepository.updateTitle(conversationId, newTitle)
     }
 
-    fun createMessage() {
-        messageRepository.addMessage(conversationId, _uiState.value.currentMessage)
+    fun sendMessage() {
+        messageRepository.sendMessage(conversationId, _uiState.value.currentMessage)
         _uiState.update { it.copy(currentMessage = "") }
     }
 
