@@ -1,5 +1,10 @@
 package com.example.docbot.ui.screens.chat
 
+import android.app.Activity
+import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,6 +38,23 @@ fun ChatScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val pdfLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data
+            viewModel.processDocument(uri)
+        }
+    }
+
+    fun openFilePickerActivity() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+        }
+        pdfLauncher.launch(intent)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,7 +72,7 @@ fun ChatScreen(
                         )
                     }
                     IconButton(
-                        onClick = { /* click me ! */ }
+                        onClick = { openFilePickerActivity() }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AttachFile,
@@ -62,11 +84,6 @@ fun ChatScreen(
             )
         }
     ) { innerPadding ->
-//        Text(
-//            "$conversationId",
-//            modifier = Modifier.padding(innerPadding)
-//        )
-
         Column(
             modifier = Modifier
                 .padding(innerPadding)

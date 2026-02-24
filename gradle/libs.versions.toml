@@ -19,6 +19,7 @@ navigation3 = "1.0.1"
 viewModelNavigation3 = "2.10.0"
 serialization = "1.10.0"
 litertlm = "0.8.0"
+pdfBox = "2.0.27.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigat
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 androidx-litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
+androidx-pdfbox = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfBox" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

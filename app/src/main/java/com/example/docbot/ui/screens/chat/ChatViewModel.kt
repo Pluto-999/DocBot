@@ -1,8 +1,10 @@
 package com.example.docbot.ui.screens.chat
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
+import com.example.docbot.data.repositories.DocumentRepository
 import com.example.docbot.data.repositories.MessageRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -24,6 +26,7 @@ interface ChatViewModelFactory {
 class ChatViewModel @AssistedInject constructor(
     private val conversationRepository: ConversationRepository,
     private val messageRepository: MessageRepository,
+    private val documentRepository: DocumentRepository,
     @Assisted val conversationId: Long
 ): ViewModel() {
 
@@ -37,7 +40,7 @@ class ChatViewModel @AssistedInject constructor(
         getMessages()
     }
 
-    fun getMessages() {
+    private fun getMessages() {
         // we must use viewModel coroutine otherwise we can't use .collect !
         viewModelScope.launch {
             messageRepository.getMessages(conversationId).collect { messages ->
@@ -78,4 +81,9 @@ class ChatViewModel @AssistedInject constructor(
         _uiState.update { it.copy(currentMessage = newMessage) }
     }
 
+    fun processDocument(uri: Uri?) {
+        if (uri != null) {
+            documentRepository.processPDF(uri)
+        }
+    }
 }

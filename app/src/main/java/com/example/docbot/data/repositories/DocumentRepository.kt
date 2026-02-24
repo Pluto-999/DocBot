@@ -1,5 +1,7 @@
 package com.example.docbot.data.repositories
 
+import android.net.Uri
+
 interface DocumentRepository {
-    fun parsePDF()
+    fun processPDF(uri: Uri)
 }

@@ -1,5 +1,6 @@
 package com.example.docbot.di
 
+import android.content.Context
 import com.example.docbot.data.ObjectBox
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Document
@@ -7,13 +8,17 @@ import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.repositories.ConversationRepository
 import com.example.docbot.data.repositories.ConversationRepositoryImpl
+import com.example.docbot.data.repositories.DocumentRepository
+import com.example.docbot.data.repositories.DocumentRepositoryImpl
 import com.example.docbot.data.repositories.MessageRepository
 import com.example.docbot.data.repositories.MessageRepositoryImpl
 import com.example.docbot.data.sources.ConversationLocalDataSource
+import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.data.sources.MessageLocalDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
@@ -77,5 +82,14 @@ object AppModule {
         messageLocalDataSource: MessageLocalDataSource
     ): MessageRepository {
         return MessageRepositoryImpl(messageLocalDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDocumentRepository(
+        documentLocalDataSource: DocumentLocalDataSource,
+        @ApplicationContext applicationContext: Context
+    ): DocumentRepository {
+        return DocumentRepositoryImpl(documentLocalDataSource, applicationContext)
     }
 }

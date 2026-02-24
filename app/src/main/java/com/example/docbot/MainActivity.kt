@@ -23,46 +23,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-//    override fun onActivityResult(
-//        requestCode: Int,
-//        resultCode: Int,
-//        data: Intent?,
-//        caller: ComponentCaller
-//    ) {
-//        super.onActivityResult(requestCode, resultCode, data, caller)
-//    }
-//
-////    fun getDocumentURI() {
-////        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-////            addCategory(Intent.CATEGORY_OPENABLE)
-////            type = "application/pdf"
-////        }
-////        startActivityForResult(intent, 2)
-////
-////        val startForResult = registerForActivityResult(
-////            ActivityResultContracts.StartActivityForResult()) { result ->
-////                if (result.resultCode == Activity.RESULT_OK) {
-////                    val data: Intent? = result.data
-////                }
-////        }
-////    }
-//
-//    fun openSomeActivityForResult() {
-//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-//            addCategory(Intent.CATEGORY_OPENABLE)
-//            type = "application/pdf"
-//        }
-//        resultLauncher.launch(intent)
-//    }
-//
-//    var resultLauncher = registerForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { result ->
-//        if (result.resultCode == Activity.RESULT_OK) {
-//            // There are no request codes
-//            val data: Intent? = result.data
-//
-//        }
-//    }
 }

@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.litertlm)
+    implementation(libs.androidx.pdfbox)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
