@@ -18,7 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import javax.inject.Inject
+import kotlin.io.encoding.Base64
 
 class DocumentRepositoryImpl @Inject constructor(
     private val documentLocalDataSource: DocumentLocalDataSource,
@@ -33,11 +36,19 @@ class DocumentRepositoryImpl @Inject constructor(
 
     override fun processDocument(uri: Uri, conversationId: Long): String {
 
-        val documentName = getDocumentName(uri, conversationId)
         val extractedText = extractText(uri)
         Log.e("EXTRACTED TEXT !!!", extractedText)
 
-        embedChunk(extractedText)
+        val hashString = getDocumentHash(extractedText)
+        Log.e("HASH !!!!", hashString)
+
+        val chunkedText = chunkText(extractedText)
+
+        for (chunk in chunkedText) {
+            embedChunk(chunk)
+        }
+
+        val documentName = getDocumentName(uri, conversationId)
 
         return documentName
     }
@@ -83,8 +94,9 @@ class DocumentRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun chunkText(text: String) {
+    private fun chunkText(text: String): List<String> {
 
+        return listOf("1", "2", "3")
     }
 
     private fun embedChunk(chunk: String) {
@@ -112,7 +124,10 @@ class DocumentRepositoryImpl @Inject constructor(
 
     }
 
-    private fun getDocumentHash(text: String) {
-
+    private fun getDocumentHash(text: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest(text.toByteArray(StandardCharsets.UTF_8))
+        val hashString = android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP)
+        return hashString
     }
 }
