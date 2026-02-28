@@ -70,7 +70,7 @@ class DocumentRepositoryImpl @Inject constructor(
         try {
             val pdfStripper = PDFTextStripper()
             pdfStripper.startPage = 0
-            pdfStripper.endPage = 1
+            pdfStripper.endPage = document.numberOfPages
             val parsedText = pdfStripper.getText(document)
             return parsedText
         }
