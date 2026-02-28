@@ -59,7 +59,7 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     private fun getConversationTitle() {
-        val title = conversationRepository.getConversationTitle(conversationId) ?: "Blah"
+        val title = conversationRepository.getConversationTitle(conversationId) ?: "Untitled"
         _uiState.update { it.copy(title = title) }
     }
 
@@ -70,6 +70,15 @@ class ChatViewModel @AssistedInject constructor(
     fun updateConversationTitle(newTitle: String) {
         _uiState.update { it.copy(title = newTitle) }
         conversationRepository.updateTitle(conversationId, newTitle)
+    }
+
+    fun toggleDocumentPickerDialog(isOpen: Boolean) {
+        _uiState.update { it.copy(openDocumentPickerDialog = isOpen) }
+    }
+
+    fun getDocumentNames() {
+        val documentNames = documentRepository.getAllDocumentTitles(conversationId)
+        _uiState.update { it.copy(documentNames = documentNames) }
     }
 
     fun sendMessage() {
@@ -83,7 +92,7 @@ class ChatViewModel @AssistedInject constructor(
 
     fun processDocument(uri: Uri?) {
         if (uri != null) {
-            documentRepository.processPDF(uri)
+            documentRepository.processDocument(uri, conversationId)
         }
     }
 }

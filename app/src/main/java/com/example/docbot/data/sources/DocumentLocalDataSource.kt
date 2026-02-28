@@ -4,4 +4,7 @@ import javax.inject.Inject
 
 class DocumentLocalDataSource @Inject constructor() {
 
+    fun getDocumentTitles(conversationId: Long) {
+
+    }
 }

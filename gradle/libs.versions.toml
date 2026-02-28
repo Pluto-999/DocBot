@@ -19,7 +19,11 @@ navigation3 = "1.0.1"
 viewModelNavigation3 = "2.10.0"
 serialization = "1.10.0"
 litertlm = "0.8.0"
+aiEdgeRag = "0.3.0"
 pdfBox = "2.0.27.0"
+guava = "33.5.0-android"
+kotlinGuava = "1.10.2"
+protoBuf = "4.34.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,7 +52,11 @@ androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigat
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 androidx-litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
+androidx-rag = { group = "com.google.ai.edge.localagents", name = "localagents-rag", version.ref = "aiEdgeRag" }
 androidx-pdfbox = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfBox" }
+androidx-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+kotlinx-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinGuava" }
+androidx-protobuf = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protoBuf" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

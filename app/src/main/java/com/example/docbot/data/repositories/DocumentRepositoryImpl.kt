@@ -1,14 +1,22 @@
 package com.example.docbot.data.repositories
 
-import android.content.ContentResolver
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.google.ai.edge.localagents.rag.models.EmbedData
+import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
+import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
 
@@ -17,16 +25,43 @@ class DocumentRepositoryImpl @Inject constructor(
     @ApplicationContext private val applicationContext: Context
 ) : DocumentRepository {
 
-    override fun processPDF(uri: Uri) {
-        val contentResolver = applicationContext.contentResolver
+    private val contentResolver = applicationContext.contentResolver
 
-        Log.e("EXTRACTED TEXT !!!", extractText(contentResolver, uri))
+    override fun getAllDocumentTitles(conversationId: Long): List<String> {
+        TODO("Not yet implemented")
     }
 
-    private fun extractText(
-        contentResolver: ContentResolver,
-        uri: Uri
-    ): String {
+    override fun processDocument(uri: Uri, conversationId: Long): String {
+
+        val documentName = getDocumentName(uri, conversationId)
+        val extractedText = extractText(uri)
+        Log.e("EXTRACTED TEXT !!!", extractedText)
+
+        embedChunk(extractedText)
+
+        return documentName
+    }
+
+    private fun getDocumentName(uri: Uri, conversationId: Long): String {
+        var documentName = ""
+
+        val cursor: Cursor? = contentResolver.query(
+            uri, null, null, null, null, null
+        )
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+
+                documentName = it.getString(columnIndex)
+
+                Log.e("DISPLAY NAME !!!!", "Display Name: $documentName")
+            }
+        }
+
+        return documentName
+    }
+
+    private fun extractText(uri: Uri): String {
         val pdfInputStream = contentResolver.openInputStream(uri)
 
         PDFBoxResourceLoader.init(applicationContext)
@@ -40,11 +75,44 @@ class DocumentRepositoryImpl @Inject constructor(
             return parsedText
         }
         catch (e: IOException) {
-            Log.e("parsePDF", "Failed trying to strip text: $e")
+            Log.e("extractText", "Failed trying to strip text: $e")
             return ""
         }
         finally {
             document.close()
         }
+    }
+
+    private fun chunkText(text: String) {
+
+    }
+
+    private fun embedChunk(chunk: String) {
+        val embeddingModel = GemmaEmbeddingModel(
+            "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
+            "/data/local/tmp/slm/sentencepiece.model",
+            false
+        )
+
+        val dataToEmbed = EmbedData.create<String>(
+            chunk,
+            EmbedData.TaskType.RETRIEVAL_DOCUMENT,
+            false
+        )
+
+        val embeddingRequest = EmbeddingRequest.create<String>(listOf(dataToEmbed))
+
+        val embeddingsFuture = embeddingModel.getEmbeddings(embeddingRequest)
+
+        CoroutineScope(Dispatchers.Default).launch {
+            val embeddings = embeddingsFuture.await()
+
+            Log.e("EMBEDDINGS !!!!", embeddings.toString())
+        }
+
+    }
+
+    private fun getDocumentHash(text: String) {
+
     }
 }

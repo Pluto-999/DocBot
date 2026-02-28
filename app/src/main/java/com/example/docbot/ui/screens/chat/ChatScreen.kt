@@ -2,7 +2,6 @@ package com.example.docbot.ui.screens.chat
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.docbot.ui.screens.chat.components.DocumentPicker
 import com.example.docbot.ui.screens.chat.components.MessageList
 import com.example.docbot.ui.screens.chat.components.MessageTextBox
 import com.example.docbot.ui.screens.chat.components.UpdateConversationTitle
@@ -72,7 +72,10 @@ fun ChatScreen(
                         )
                     }
                     IconButton(
-                        onClick = { openFilePickerActivity() }
+                        onClick = {
+//                            openFilePickerActivity()
+                        viewModel.toggleDocumentPickerDialog(true)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AttachFile,
@@ -107,6 +110,15 @@ fun ChatScreen(
                 onValueChange = {
                     viewModel.updateConversationTitle(newTitle = it)
                 }
+            )
+        }
+
+        if (uiState.openDocumentPickerDialog) {
+            DocumentPicker(
+                onDismissRequest = {
+                    viewModel.toggleDocumentPickerDialog(false)
+                },
+                openDocumentPicker = { openFilePickerActivity() }
             )
         }
     }
