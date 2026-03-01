@@ -1,10 +1,13 @@
 package com.example.docbot.data.sources
 
 import com.example.docbot.data.models.Message
+import com.example.docbot.data.models.MessageType
 import com.example.docbot.data.models.Message_
 import io.objectbox.Box
+import io.objectbox.kotlin.and
 import io.objectbox.kotlin.equal
 import io.objectbox.kotlin.toFlow
+import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -14,15 +17,20 @@ class MessageLocalDataSource @Inject constructor(
     fun getMessages(conversationId: Long): Flow<List<Message>> {
         return messageBox
             .query(Message_.conversationId equal conversationId)
+            .order(Message_.timestamp)
             .build()
             .subscribe()
             .toFlow()
     }
 
-    fun addMessage(conversationId: Long, newMessage: String) {
+    fun insertMessage(
+        conversationId: Long,
+        messageContents: String,
+        messageType: MessageType
+    ) {
         messageBox.put(Message(
-            contents = newMessage,
-            messageType = "PROMPT",
+            contents = messageContents,
+            messageType = messageType,
             conversationId = conversationId
         ))
     }

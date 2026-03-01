@@ -1,6 +1,7 @@
 package com.example.docbot.ui.screens.chat
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -82,12 +84,25 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     fun sendMessage() {
-        messageRepository.sendMessage(conversationId, _uiState.value.currentMessage)
-        _uiState.update { it.copy(currentMessage = "") }
+        viewModelScope.launch {
+            messageRepository
+                .sendMessage(conversationId, _uiState.value.currentUserMessage)
+                .onCompletion {
+                    val response = _uiState.value.currentResponseMessage
+                    messageRepository.saveResponse(conversationId, response)
+                    _uiState.update { it.copy(currentResponseMessage = "") }
+                }
+                .collect { value ->
+                    _uiState.update {
+                        it.copy(currentResponseMessage = it.currentResponseMessage + value.toString())
+                    }
+                }
+        }
+        _uiState.update { it.copy(currentUserMessage = "") }
     }
 
     fun updateCurrentMessage(newMessage: String) {
-        _uiState.update { it.copy(currentMessage = newMessage) }
+        _uiState.update { it.copy(currentUserMessage = newMessage) }
     }
 
     fun processDocument(uri: Uri?) {

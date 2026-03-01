@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
     fun getMessages(conversationId: Long): Flow<List<Message>>
-    fun sendMessage(conversationId: Long, message: String)
+    suspend fun sendMessage(conversationId: Long, message: String): Flow<com.google.ai.edge.litertlm.Message>
+    fun saveResponse(conversationId: Long, message: String)
 }

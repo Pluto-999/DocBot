@@ -15,6 +15,9 @@ import com.example.docbot.data.repositories.MessageRepositoryImpl
 import com.example.docbot.data.sources.ConversationLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.data.sources.MessageLocalDataSource
+import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.EngineConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,9 +82,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMessageRepository(
-        messageLocalDataSource: MessageLocalDataSource
+        messageLocalDataSource: MessageLocalDataSource,
+        engine: Engine
     ): MessageRepository {
-        return MessageRepositoryImpl(messageLocalDataSource)
+        return MessageRepositoryImpl(messageLocalDataSource, engine)
     }
 
     @Provides
@@ -91,5 +95,16 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): DocumentRepository {
         return DocumentRepositoryImpl(documentLocalDataSource, applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEngine(): Engine {
+        return Engine(
+            EngineConfig(
+                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
+                backend = Backend.CPU
+            )
+        )
     }
 }

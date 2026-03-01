@@ -11,10 +11,15 @@ import java.time.LocalDateTime
 data class Message(
     @Id var id: Long = 0,
     var contents: String = "",
-    var messageType: String = "",
+    @Convert(converter = MessageTypeConverter::class, dbType = Int::class)
+    var messageType: MessageType = MessageType.UNKNOWN,
     @Convert(converter = LocalDateTimeConverter::class, dbType = Long::class)
     var timestamp: LocalDateTime = LocalDateTime.now(),
     var conversationId: Long = 0
 ) {
     lateinit var conversation: ToOne<Conversation>
+}
+
+enum class MessageType(val id: Int) {
+    PROMPT(0), RESPONSE(1), UNKNOWN(2)
 }

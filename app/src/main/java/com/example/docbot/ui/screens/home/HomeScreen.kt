@@ -134,11 +134,10 @@ fun ConversationList(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         items(conversations) { conversation ->
             ConversationCard(

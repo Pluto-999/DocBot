@@ -21,7 +21,6 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import javax.inject.Inject
-import kotlin.io.encoding.Base64
 
 class DocumentRepositoryImpl @Inject constructor(
     private val documentLocalDataSource: DocumentLocalDataSource,
