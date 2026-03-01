@@ -22,6 +22,7 @@ import com.example.docbot.ui.screens.chat.MessageState
 @Composable
 fun MessageList(
     messages: List<MessageState>,
+    currentResponse: String,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -57,6 +58,23 @@ fun MessageList(
                             .padding(12.dp)
                     ){
                         Text(message.contents)
+                    }
+                }
+            }
+        }
+        if (currentResponse.isNotEmpty()) {
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ){
+                    Box (
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .padding(12.dp)
+                    ){
+                        Text(currentResponse)
                     }
                 }
             }

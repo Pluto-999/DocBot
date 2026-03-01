@@ -102,9 +102,9 @@ fun ChatScreen(
         ) {
             MessageList(
                 messages = uiState.messages,
+                currentResponse = uiState.currentResponseMessage,
                 modifier = Modifier.weight(1f)
             )
-//            Text(text = uiState.currentResponseMessage)
             MessageTextBox(
                 value = uiState.currentUserMessage,
                 onValueChange = { viewModel.updateCurrentMessage(newMessage = it) },
@@ -131,5 +131,4 @@ fun ChatScreen(
             )
         }
     }
-
 }
