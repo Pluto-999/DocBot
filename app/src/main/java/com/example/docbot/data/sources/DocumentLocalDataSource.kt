@@ -7,4 +7,8 @@ class DocumentLocalDataSource @Inject constructor() {
     fun getDocumentTitles(conversationId: Long) {
 
     }
+
+    fun findDocumentHash(hash: String): Boolean {
+        return true
+    }
 }

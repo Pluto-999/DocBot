@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.google.ai.edge.localagents.rag.chunking.TextChunker
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
 import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
@@ -36,19 +37,18 @@ class DocumentRepositoryImpl @Inject constructor(
     override fun processDocument(uri: Uri, conversationId: Long): String {
 
         val extractedText = extractText(uri)
-        Log.e("EXTRACTED TEXT !!!", extractedText)
 
-        val hashString = getDocumentHash(extractedText)
-        Log.e("HASH !!!!", hashString)
+        val hashText = getDocumentHash(extractedText)
+        val documentProcessed = documentLocalDataSource.findDocumentHash(hashText)
 
-        val chunkedText = chunkText(extractedText)
-
-        for (chunk in chunkedText) {
-            embedChunk(chunk)
+        if (!documentProcessed) {
+            val chunkedText = chunkText(extractedText)
+            for (chunk in chunkedText) {
+                val embedding = embedChunk(chunk)
+            }
         }
 
         val documentName = getDocumentName(uri, conversationId)
-
         return documentName
     }
 
@@ -93,10 +93,67 @@ class DocumentRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun chunkText(text: String): List<String> {
+//    private fun chunkText(text: String): MutableList<String> {
+//        // base case
+//        if (getTokenLength(text) <= 512) {
+//            return mutableListOf(text)
+//        }
+//
+//        val chunks = mutableListOf<String>()
+//
+//        val paragraphSplit = text.split("\\n\\n")
+//        for (split in paragraphSplit) {
+//            chunks += chunkText(split)
+//        }
+//
+//        val lineSplit = text.split("\\n")
+//        for (split in lineSplit) {
+//            chunks += chunkText(split)
+//        }
+//
+//        val spaceSplit = text.split(" ")
+//        for (split in spaceSplit) {
+//            chunks += split
+//        }
+//
+//        return chunks
+//    }
 
-        return listOf("1", "2", "3")
+//    private fun chunkText(text: String): MutableList<String> {
+//        val chunks = mutableListOf<String>()
+//
+//        val paragraphSplit = text.split("\n\n")
+//        for (split in paragraphSplit) {
+//            if (getTokenLength(split) <= 512) {
+//                chunks += split
+//            }
+//            else {
+//                val lineSplit = text.split("\n")
+//                for (split in lineSplit) {
+//                    if (getTokenLength(split) <= 512) {
+//                        chunks += split
+//                    }
+//                    else {
+//                        val spaceSplit = text.split(" ")
+//                        for (split in spaceSplit) {
+//                            chunks += split
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return chunks
+//    }
+
+    private fun chunkText(text: String): List<String> {
+        return TextChunker().chunk(text, 512, 30)
     }
+
+
+//    private fun getTokenLength(chunk: String): Int {
+//        return chunk.length / 4
+//    }
 
     private fun embedChunk(chunk: String) {
         val embeddingModel = GemmaEmbeddingModel(
