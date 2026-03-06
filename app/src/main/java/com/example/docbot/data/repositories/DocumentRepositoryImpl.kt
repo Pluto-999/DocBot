@@ -5,19 +5,18 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.google.ai.edge.localagents.rag.chunking.TextChunker
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
 import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
+import com.google.common.collect.ImmutableList
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.guava.await
-import kotlinx.coroutines.launch
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -25,6 +24,7 @@ import javax.inject.Inject
 
 class DocumentRepositoryImpl @Inject constructor(
     private val documentLocalDataSource: DocumentLocalDataSource,
+    private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
     @ApplicationContext private val applicationContext: Context
 ) : DocumentRepository {
 
@@ -34,25 +34,38 @@ class DocumentRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun processDocument(uri: Uri, conversationId: Long): String {
+    override suspend fun processDocument(uri: Uri, conversationId: Long): String {
+
+        val documentName = getDocumentName(uri)
 
         val extractedText = extractText(uri)
 
         val hashText = getDocumentHash(extractedText)
-        val documentProcessed = documentLocalDataSource.findDocumentHash(hashText)
+        val documentIsProcessed = documentLocalDataSource.findDocumentHash(hashText)
 
-        if (!documentProcessed) {
+        // if the document hasn't been processed, then we need to add it to the document table,
+        // along with processing and adding all of its chunks to the documentChunk table !
+        if (!documentIsProcessed) {
+
+            // first, insert the document to the document table, returning the document id
+            // this document id can be used for adding the chunks so we know the associated document
+            val documentId = documentLocalDataSource.insertDocument(
+                documentName,
+                hashText,
+                conversationId
+            )
+
             val chunkedText = chunkText(extractedText)
             for (chunk in chunkedText) {
-                val embedding = embedChunk(chunk)
+                val embedding = generateEmbedding(chunk)
+                documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
             }
         }
 
-        val documentName = getDocumentName(uri, conversationId)
         return documentName
     }
 
-    private fun getDocumentName(uri: Uri, conversationId: Long): String {
+    private fun getDocumentName(uri: Uri): String {
         var documentName = ""
 
         val cursor: Cursor? = contentResolver.query(
@@ -63,15 +76,13 @@ class DocumentRepositoryImpl @Inject constructor(
                 val columnIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
 
                 documentName = it.getString(columnIndex)
-
-                Log.e("DISPLAY NAME !!!!", "Display Name: $documentName")
             }
         }
 
         return documentName
     }
 
-    private fun extractText(uri: Uri): String {
+    private suspend fun extractText(uri: Uri): String {
         val pdfInputStream = contentResolver.openInputStream(uri)
 
         PDFBoxResourceLoader.init(applicationContext)
@@ -155,7 +166,7 @@ class DocumentRepositoryImpl @Inject constructor(
 //        return chunk.length / 4
 //    }
 
-    private fun embedChunk(chunk: String) {
+    private suspend fun generateEmbedding(chunk: String): ImmutableList<Float> {
         val embeddingModel = GemmaEmbeddingModel(
             "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
             "/data/local/tmp/slm/sentencepiece.model",
@@ -172,12 +183,11 @@ class DocumentRepositoryImpl @Inject constructor(
 
         val embeddingsFuture = embeddingModel.getEmbeddings(embeddingRequest)
 
-        CoroutineScope(Dispatchers.Default).launch {
-            val embeddings = embeddingsFuture.await()
+        val embeddings = embeddingsFuture.await()
 
-            Log.e("EMBEDDINGS !!!!", embeddings.toString())
-        }
+        Log.e("EMBEDDINGS !!!!", embeddings.toString())
 
+        return embeddings
     }
 
     private fun getDocumentHash(text: String): String {

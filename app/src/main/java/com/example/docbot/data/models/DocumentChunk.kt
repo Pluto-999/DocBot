@@ -1,6 +1,7 @@
 package com.example.docbot.data.models
 
 import io.objectbox.annotation.Entity
+import io.objectbox.annotation.HnswIndex
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToOne
 
@@ -8,8 +9,8 @@ import io.objectbox.relation.ToOne
 data class DocumentChunk(
     @Id var id: Long = 0,
     var chunk: String = "",
+    @HnswIndex(dimensions = 768, neighborsPerNode = 50, indexingSearchCount = 150)
     var embedding: FloatArray? = null,
-    var documentId: Long = 0
 ) {
     lateinit var document: ToOne<Document>
 }

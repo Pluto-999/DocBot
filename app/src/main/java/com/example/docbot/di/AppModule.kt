@@ -13,6 +13,7 @@ import com.example.docbot.data.repositories.DocumentRepositoryImpl
 import com.example.docbot.data.repositories.MessageRepository
 import com.example.docbot.data.repositories.MessageRepositoryImpl
 import com.example.docbot.data.sources.ConversationLocalDataSource
+import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.data.sources.MessageLocalDataSource
 import com.google.ai.edge.litertlm.Backend
@@ -57,22 +58,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideConversationLocalDatSource(
-        conversationBox: Box<Conversation>,
-        messageBox: Box<Message>,
-        documentBox: Box<Document>,
-        documentChunkBox: Box<DocumentChunk>
-    ): ConversationLocalDataSource {
-        return ConversationLocalDataSource(
-            conversationBox,
-            messageBox,
-            documentBox,
-            documentChunkBox
-        )
-    }
-
-    @Provides
-    @Singleton
     fun provideConversationRepository(
         conversationLocalDataSource: ConversationLocalDataSource
     ): ConversationRepository {
@@ -92,9 +77,14 @@ object AppModule {
     @Singleton
     fun provideDocumentRepository(
         documentLocalDataSource: DocumentLocalDataSource,
+        documentChunkLocalDataSource: DocumentChunkLocalDataSource,
         @ApplicationContext applicationContext: Context
     ): DocumentRepository {
-        return DocumentRepositoryImpl(documentLocalDataSource, applicationContext)
+        return DocumentRepositoryImpl(
+            documentLocalDataSource,
+            documentChunkLocalDataSource,
+            applicationContext
+        )
     }
 
     @Provides

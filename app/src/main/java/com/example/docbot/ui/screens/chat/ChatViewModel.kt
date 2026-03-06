@@ -11,6 +11,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -107,7 +108,9 @@ class ChatViewModel @AssistedInject constructor(
 
     fun processDocument(uri: Uri?) {
         if (uri != null) {
-            documentRepository.processDocument(uri, conversationId)
+            viewModelScope.launch(Dispatchers.Default) {
+                documentRepository.processDocument(uri, conversationId)
+            }
         }
     }
 }
