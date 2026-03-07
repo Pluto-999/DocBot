@@ -167,30 +167,6 @@ class DocumentRepositoryImpl @Inject constructor(
 //        return chunk.length / 4
 //    }
 
-//    private suspend fun generateEmbedding(chunk: String): ImmutableList<Float> {
-//        val embeddingModel = GemmaEmbeddingModel(
-//            "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
-//            "/data/local/tmp/slm/sentencepiece.model",
-//            false
-//        )
-//
-//        val dataToEmbed = EmbedData.create<String>(
-//            chunk,
-//            EmbedData.TaskType.RETRIEVAL_DOCUMENT,
-//            false
-//        )
-//
-//        val embeddingRequest = EmbeddingRequest.create<String>(listOf(dataToEmbed))
-//
-//        val embeddingsFuture = embeddingModel.getEmbeddings(embeddingRequest)
-//
-//        val embeddings = embeddingsFuture.await()
-//
-//        Log.e("EMBEDDINGS !!!!", embeddings.toString())
-//
-//        return embeddings
-//    }
-
     private fun getDocumentHash(text: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(text.toByteArray(StandardCharsets.UTF_8))
