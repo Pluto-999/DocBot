@@ -5,18 +5,15 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import com.example.docbot.data.embedding.generateEmbedding
 import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.google.ai.edge.localagents.rag.chunking.TextChunker
 import com.google.ai.edge.localagents.rag.models.EmbedData
-import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
-import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
-import com.google.common.collect.ImmutableList
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.guava.await
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -57,7 +54,11 @@ class DocumentRepositoryImpl @Inject constructor(
 
             val chunkedText = chunkText(extractedText)
             for (chunk in chunkedText) {
-                val embedding = generateEmbedding(chunk)
+                val embedding = generateEmbedding(
+                    chunk,
+                    EmbedData.TaskType.RETRIEVAL_DOCUMENT,
+                    false
+                )
                 documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
             }
         }
@@ -166,29 +167,29 @@ class DocumentRepositoryImpl @Inject constructor(
 //        return chunk.length / 4
 //    }
 
-    private suspend fun generateEmbedding(chunk: String): ImmutableList<Float> {
-        val embeddingModel = GemmaEmbeddingModel(
-            "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
-            "/data/local/tmp/slm/sentencepiece.model",
-            false
-        )
-
-        val dataToEmbed = EmbedData.create<String>(
-            chunk,
-            EmbedData.TaskType.RETRIEVAL_DOCUMENT,
-            false
-        )
-
-        val embeddingRequest = EmbeddingRequest.create<String>(listOf(dataToEmbed))
-
-        val embeddingsFuture = embeddingModel.getEmbeddings(embeddingRequest)
-
-        val embeddings = embeddingsFuture.await()
-
-        Log.e("EMBEDDINGS !!!!", embeddings.toString())
-
-        return embeddings
-    }
+//    private suspend fun generateEmbedding(chunk: String): ImmutableList<Float> {
+//        val embeddingModel = GemmaEmbeddingModel(
+//            "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
+//            "/data/local/tmp/slm/sentencepiece.model",
+//            false
+//        )
+//
+//        val dataToEmbed = EmbedData.create<String>(
+//            chunk,
+//            EmbedData.TaskType.RETRIEVAL_DOCUMENT,
+//            false
+//        )
+//
+//        val embeddingRequest = EmbeddingRequest.create<String>(listOf(dataToEmbed))
+//
+//        val embeddingsFuture = embeddingModel.getEmbeddings(embeddingRequest)
+//
+//        val embeddings = embeddingsFuture.await()
+//
+//        Log.e("EMBEDDINGS !!!!", embeddings.toString())
+//
+//        return embeddings
+//    }
 
     private fun getDocumentHash(text: String): String {
         val digest = MessageDigest.getInstance("SHA-256")

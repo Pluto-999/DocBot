@@ -9,7 +9,7 @@ import io.objectbox.relation.ToOne
 data class DocumentChunk(
     @Id var id: Long = 0,
     var chunk: String = "",
-    @HnswIndex(dimensions = 768, neighborsPerNode = 50, indexingSearchCount = 150)
+    @HnswIndex(dimensions = 768, neighborsPerNode = 50, indexingSearchCount = 200)
     var embedding: FloatArray? = null,
 ) {
     lateinit var document: ToOne<Document>

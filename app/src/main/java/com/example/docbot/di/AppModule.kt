@@ -68,9 +68,16 @@ object AppModule {
     @Singleton
     fun provideMessageRepository(
         messageLocalDataSource: MessageLocalDataSource,
+        documentLocalDataSource: DocumentLocalDataSource,
+        documentChunkLocalDataSource: DocumentChunkLocalDataSource,
         engine: Engine
     ): MessageRepository {
-        return MessageRepositoryImpl(messageLocalDataSource, engine)
+        return MessageRepositoryImpl(
+            messageLocalDataSource,
+            documentLocalDataSource,
+            documentChunkLocalDataSource,
+            engine
+        )
     }
 
     @Provides

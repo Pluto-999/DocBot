@@ -1,26 +1,29 @@
 package com.example.docbot.data.sources
 
 import com.example.docbot.data.models.Conversation
+import com.example.docbot.data.models.Conversation_
 import com.example.docbot.data.models.Document
-import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.Document_
 import io.objectbox.Box
-import io.objectbox.kotlin.equal
 import javax.inject.Inject
 
 class DocumentLocalDataSource @Inject constructor(
     private val documentBox: Box<Document>,
-    private val documentChunkBox: Box<DocumentChunk>,
     private val conversationBox: Box<Conversation>
 ) {
 
-    fun getDocumentTitles(conversationId: Long) {
+    fun getDocuments(conversationId: Long): List<Document> {
+        val builder = documentBox.query()
 
+        builder.link(Document_.conversations)
+            .apply(Conversation_.id.equal(conversationId))
+
+        return builder.build().find()
     }
 
     fun findDocumentHash(hash: String): Boolean {
         val findDocument = documentBox
-            .query(Document_.contentHash equal hash)
+            .query(Document_.contentHash.equal(hash))
             .build()
             .find()
 
