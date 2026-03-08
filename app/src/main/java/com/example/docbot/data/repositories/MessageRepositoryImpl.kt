@@ -1,6 +1,5 @@
 package com.example.docbot.data.repositories
 
-import android.util.Log
 import com.example.docbot.data.embedding.generateEmbedding
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
@@ -39,9 +38,29 @@ class MessageRepositoryImpl @Inject constructor(
         val initialisedEngine = getInitialisedEngine()
         val conversation = initialisedEngine.createConversation()
 
+        val messageContexts = addMessageContexts(message, conversationId)
+
+        val fullMessage = """
+            $messageContexts
+            
+            Answer the following prompt: $message 
+        """.trimIndent()
+
+        val messageFlow = conversation.sendMessageAsync(
+            com.google.ai.edge.litertlm.Message.of(fullMessage)
+        )
+
+        return messageFlow
+    }
+
+    private suspend fun addMessageContexts(
+        prompt: String,
+        conversationId: Long
+    ): String {
+
         // do the final stage of the RAG pipeline -- i.e. embed the message and get the relevant context
         val promptEmbedding = generateEmbedding(
-            message,
+            prompt,
             EmbedData.TaskType.RETRIEVAL_QUERY,
             true
         )
@@ -81,19 +100,7 @@ class MessageRepositoryImpl @Inject constructor(
                 """.trimIndent()
             }
 
-        val fullMessage = """
-            $contextString
-            
-            $previousMessagesString
-            
-            Answer the following prompt: $message 
-        """.trimIndent()
-
-        val messageFlow = conversation.sendMessageAsync(
-            com.google.ai.edge.litertlm.Message.of(fullMessage)
-        )
-
-        return messageFlow
+        return "$contextString\n\n$previousMessagesString"
     }
 
     override fun saveResponse(conversationId: Long, message: String) {
