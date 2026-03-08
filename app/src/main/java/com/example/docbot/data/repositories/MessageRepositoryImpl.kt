@@ -1,5 +1,6 @@
 package com.example.docbot.data.repositories
 
+import android.util.Log
 import com.example.docbot.data.embedding.generateEmbedding
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
@@ -56,12 +57,36 @@ class MessageRepositoryImpl @Inject constructor(
                 "Use the following context when answering this prompt, alongside your own knowledge if required: $promptContext"
             }
 
-        val previousPromptsString = "Consider the previous prompts and responses that have been given: "
+        val previousMessages = messageLocalDataSource.getRecentMessages(conversationId)
+
+        val previousMessagesFormatted = mutableListOf<String>()
+
+        previousMessages.forEach { message ->
+            if (message.messageType == MessageType.PROMPT) {
+                previousMessagesFormatted.add("Prompt asked by the user: ${message.contents}")
+            }
+            else if (message.messageType == MessageType.RESPONSE) {
+                previousMessagesFormatted.add("The response given by you: ${message.contents}")
+            }
+        }
+
+        val previousMessagesString =
+            if (previousMessages.isEmpty()) {
+                ""
+            }
+            else {
+                """
+                    Previous prompts and responses in chronological order, if relevant:
+                    ${previousMessagesFormatted.joinToString("\n")}
+                """.trimIndent()
+            }
 
         val fullMessage = """
-            Answer the following prompt: $message 
-            
             $contextString
+            
+            $previousMessagesString
+            
+            Answer the following prompt: $message 
         """.trimIndent()
 
         val messageFlow = conversation.sendMessageAsync(
