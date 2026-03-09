@@ -1,9 +1,11 @@
 package com.example.docbot.ui.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,15 +37,22 @@ class HomeViewModel @Inject constructor(
         conversationRepository.deleteConversation(conversationId)
     }
 
+    private var conversationJob: Job? = null
+
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
     fun getConversations(
-        type: GetConversationType = GetConversationType.NONE
+        order: ConversationOrder = _uiState.value.conversationOrder,
+        filter: ConversationFilter = _uiState.value.conversationFilter
     ) {
+        conversationJob?.cancel()
         // we must use viewModel coroutine otherwise we can't use .collect !
-        viewModelScope.launch {
-            conversationRepository.getConversations(type).collect { conversations ->
+        conversationJob = viewModelScope.launch {
+            conversationRepository.getConversations(
+                _uiState.value.conversationOrder,
+                _uiState.value.conversationFilter
+            ).collect { conversations ->
                 val uiConversations = mutableListOf<ConversationState>()
                 val currentDateTime = LocalDateTime.now()
                 for (conversation in conversations) {
@@ -121,27 +130,22 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(sortMenuExpanded = newState) }
     }
 
-    fun updateTitleSort(newTitleSort: SortType) {
-        _uiState.update { it.copy(titleSort = newTitleSort) }
+    fun updateConversationOrder(order: ConversationOrder) {
+        _uiState.update { it.copy(conversationOrder = order) }
+        getConversations(order = order)
     }
 
-    fun updateDateSort(newDateSort: SortType) {
-        _uiState.update { it.copy(dateSort = newDateSort) }
+    fun updateConversationFilter(filter: ConversationFilter) {
+        _uiState.update { it.copy(conversationFilter = filter) }
+        getConversations(filter = filter)
     }
 }
 
-enum class GetConversationType {
-    DATE_ASC,
-    DATE_DESC,
-    TITLE_ASC,
-    TITLE_DESC,
-    FAVOURITES,
-    DELETE_SOON,
-//    SEARCH,
-    NONE
+
+enum class ConversationOrder {
+    DATE_ASC, DATE_DESC, TITLE_ASC, TITLE_DESC
 }
 
-//sealed class GetConversationTypes {
-//    DATE_ASC,
-//
-//}
+enum class ConversationFilter {
+    FAVOURITES, DELETE_SOON, NONE
+}

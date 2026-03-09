@@ -2,7 +2,8 @@ package com.example.docbot.data.repositories
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.sources.ConversationLocalDataSource
-import com.example.docbot.ui.screens.home.GetConversationType
+import com.example.docbot.ui.screens.home.ConversationFilter
+import com.example.docbot.ui.screens.home.ConversationOrder
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -17,16 +18,23 @@ class ConversationRepositoryImpl @Inject constructor(
         conversationLocalDataSource.manuallyDeleteConversation(conversationId)
     }
 
-    override fun getConversations(type: GetConversationType): Flow<List<Conversation>> {
-        return when (type) {
-            GetConversationType.DATE_ASC -> conversationLocalDataSource.getConversationsDateAscending()
-            GetConversationType.DATE_DESC -> conversationLocalDataSource.getConversationsDateDescending()
-            GetConversationType.TITLE_ASC -> conversationLocalDataSource.getConversationsAlphabeticallyAscending()
-            GetConversationType.TITLE_DESC -> conversationLocalDataSource.getConversationsAlphabeticallyDescending()
-            GetConversationType.FAVOURITES -> conversationLocalDataSource.getFavouriteConversations()
-            GetConversationType.DELETE_SOON -> conversationLocalDataSource.getSoonToBeDeletedConversations()
-            GetConversationType.NONE -> conversationLocalDataSource.getConversations()
+    override fun getConversations(
+        order: ConversationOrder,
+        filter: ConversationFilter
+    ): Flow<List<Conversation>> {
+        val orderedConversations = when (order) {
+            ConversationOrder.DATE_ASC -> conversationLocalDataSource.getConversationsDateAscending()
+            ConversationOrder.DATE_DESC -> conversationLocalDataSource.getConversationsDateDescending()
+            ConversationOrder.TITLE_ASC -> conversationLocalDataSource.getConversationsAlphabeticallyAscending()
+            ConversationOrder.TITLE_DESC -> conversationLocalDataSource.getConversationsAlphabeticallyDescending()
         }
+
+        val filteredConversations = when (filter) {
+            ConversationFilter.FAVOURITES -> {}
+            ConversationFilter.DELETE_SOON -> {}
+            ConversationFilter.NONE -> orderedConversations
+        }
+        return orderedConversations
     }
 
 //    override fun searchForConversation(query: String): Flow<List<Conversation>> {

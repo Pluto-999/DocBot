@@ -2,17 +2,17 @@ package com.example.docbot.ui.screens.home
 
 import androidx.compose.material3.SnackbarHostState
 
-enum class SortType {
-    ASC, DESC
-}
 
 data class HomeUiState (
     val conversations: List<ConversationState> = listOf(),
     val searchQuery: String = "",
     val filterMenuExpanded: Boolean = false,
     val sortMenuExpanded: Boolean = false,
-    val titleSort: SortType = SortType.ASC,
-    val dateSort: SortType = SortType.ASC,
+
+    // !! new state for the order and filter of the conversation list !!
+    val conversationOrder: ConversationOrder = ConversationOrder.DATE_DESC,
+    val conversationFilter: ConversationFilter = ConversationFilter.NONE,
+
     val snackbarHostState: SnackbarHostState = SnackbarHostState(),
 )
 
@@ -21,6 +21,6 @@ data class ConversationState(
     val title: String = "",
     val isFavourite: Boolean = false,
     val date: String = "",
-    val deleteSoon: Boolean = true
+    val deleteSoon: Boolean = false
 )
 

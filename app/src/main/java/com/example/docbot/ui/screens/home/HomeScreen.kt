@@ -46,18 +46,17 @@ fun HomeScreen(
                 filterMenuExpanded = filterExpanded,
                 filterMenuDismiss = { viewModel.toggleFilterMenu(false) },
                 titleOnClick = {
-                    if (uiState.titleSort == SortType.ASC) {
-                        viewModel.updateTitleSort(SortType.DESC)
-                        viewModel.getConversations(GetConversationType.TITLE_DESC)
-                    } else {
-                        viewModel.updateTitleSort(SortType.ASC)
-                        viewModel.getConversations(GetConversationType.TITLE_ASC)
+                    if (uiState.conversationOrder == ConversationOrder.TITLE_ASC) {
+                        viewModel.updateConversationOrder(ConversationOrder.TITLE_DESC)
+                    }
+                    else {
+                        viewModel.updateConversationOrder(ConversationOrder.TITLE_ASC)
                     }
                 },
                 titleIcon = {
                     Icon(
                         imageVector =
-                            if (uiState.titleSort == SortType.ASC) {
+                            if (uiState.conversationOrder == ConversationOrder.TITLE_ASC) {
                                 Icons.Default.ArrowUpward
                             } else {
                                 Icons.Default.ArrowDownward
@@ -66,19 +65,17 @@ fun HomeScreen(
                     )
                 },
                 dateOnClick = {
-                    if (uiState.dateSort == SortType.ASC) {
-                        viewModel.updateDateSort(SortType.DESC)
-                        viewModel.getConversations(GetConversationType.DATE_DESC)
+                    if (uiState.conversationOrder == ConversationOrder.DATE_ASC) {
+                        viewModel.updateConversationOrder(ConversationOrder.DATE_DESC)
                     }
                     else {
-                        viewModel.updateDateSort(SortType.ASC)
-                        viewModel.getConversations(GetConversationType.DATE_ASC)
+                        viewModel.updateConversationOrder(ConversationOrder.DATE_ASC)
                     }
                 },
                 dateIcon = {
                     Icon(
                         imageVector =
-                            if (uiState.dateSort == SortType.ASC) {
+                            if (uiState.conversationOrder == ConversationOrder.DATE_ASC) {
                                 Icons.Default.ArrowUpward
                             }
                             else {
@@ -88,10 +85,20 @@ fun HomeScreen(
                     )
                 },
                 favouriteOnClick = {
-                    viewModel.getConversations(GetConversationType.FAVOURITES)
+                    if (uiState.conversationFilter == ConversationFilter.NONE) {
+                        viewModel.updateConversationFilter(ConversationFilter.FAVOURITES)
+                    }
+                    else {
+                        viewModel.updateConversationFilter(ConversationFilter.NONE)
+                    }
                 },
                 deleteSoonOnClick = {
-                    viewModel.getConversations(GetConversationType.DELETE_SOON)
+                    if (uiState.conversationFilter == ConversationFilter.NONE) {
+                        viewModel.updateConversationFilter(ConversationFilter.DELETE_SOON)
+                    }
+                    else {
+                        viewModel.updateConversationFilter(ConversationFilter.NONE)
+                    }
                 }
             )
         },
