@@ -1,6 +1,5 @@
 package com.example.docbot.ui.screens.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
@@ -42,10 +41,7 @@ class HomeViewModel @Inject constructor(
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
-    fun getConversations(
-        order: ConversationOrder = _uiState.value.conversationOrder,
-        filter: ConversationFilter = _uiState.value.conversationFilter
-    ) {
+    fun getConversations() {
         conversationJob?.cancel()
         // we must use viewModel coroutine otherwise we can't use .collect !
         conversationJob = viewModelScope.launch {
@@ -132,12 +128,12 @@ class HomeViewModel @Inject constructor(
 
     fun updateConversationOrder(order: ConversationOrder) {
         _uiState.update { it.copy(conversationOrder = order) }
-        getConversations(order = order)
+        getConversations()
     }
 
     fun updateConversationFilter(filter: ConversationFilter) {
         _uiState.update { it.copy(conversationFilter = filter) }
-        getConversations(filter = filter)
+        getConversations()
     }
 }
 
