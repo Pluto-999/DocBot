@@ -122,11 +122,19 @@ fun HomeScreen(
             )
             ConversationList(
                 conversations = uiState.conversations,
-                viewModel = viewModel,
-                onConversationClick = onConversationNavigate,
+                onConversationFavouriteClick = { conversationId, isFavourite ->
+                    viewModel.toggleFavourite(conversationId, isFavourite)
+               },
+                onConversationDeleteClick = { viewModel.deleteConversation(it) },
+                onConversationClick = { onConversationNavigate(it) },
                 modifier = Modifier.weight(1f)
             )
-            NewConversationButton(viewModel)
+            NewConversationButton(
+                createConversation = {
+                    val conversationId = viewModel.createConversation()
+                    onConversationNavigate(conversationId)
+                }
+            )
         }
     }
 }
@@ -136,7 +144,8 @@ fun HomeScreen(
 @Composable
 fun ConversationList(
     conversations: List<ConversationState>,
-    viewModel: HomeViewModel,
+    onConversationFavouriteClick: (conversationId: Long, isFavourite: Boolean) -> Unit,
+    onConversationDeleteClick: (conversationId: Long) -> Unit,
     onConversationClick: (id: Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -152,8 +161,8 @@ fun ConversationList(
                 date = conversation.date,
                 isFavourite = conversation.isFavourite,
                 openConversation = { onConversationClick(conversation.id) },
-                favouriteClick = { viewModel.toggleFavourite(conversation.id, conversation.isFavourite) },
-                deleteClick = { viewModel.deleteConversation(conversation.id) }
+                favouriteClick = { onConversationFavouriteClick(conversation.id, conversation.isFavourite) },
+                deleteClick = { onConversationDeleteClick(conversation.id) }
             )
         }
     }

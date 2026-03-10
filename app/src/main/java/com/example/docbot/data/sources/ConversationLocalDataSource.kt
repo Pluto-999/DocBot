@@ -36,8 +36,9 @@ class ConversationLocalDataSource @Inject constructor(
     private val documentChunkBox: Box<DocumentChunk>
 ) {
 
-    fun insertConversation() {
-        conversationBox.put(Conversation())
+    fun insertConversation(): Long {
+        val conversationId = conversationBox.put(Conversation())
+        return conversationId
     }
 
 
@@ -58,13 +59,12 @@ class ConversationLocalDataSource @Inject constructor(
             ConversationFilter.FAVOURITES ->
                 conversationBox.query(
                     Conversation_.favourite.equal(true) and
-                        Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                    Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 )
             ConversationFilter.DELETE_SOON -> {
-                val sevenDaysAgoDate = getSevenDaysAgoDate()
                 conversationBox.query(
-                Conversation_.latestMessage.less(sevenDaysAgoDate) and
-                        Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                    Conversation_.latestMessage.less(getSevenDaysAgoDate()) and
+                    Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 )
             }
             ConversationFilter.NONE ->

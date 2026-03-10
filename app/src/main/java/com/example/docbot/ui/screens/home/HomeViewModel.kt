@@ -28,8 +28,9 @@ class HomeViewModel @Inject constructor(
         getConversations()
     }
 
-    fun createConversation() {
-        conversationRepository.createConversation()
+    fun createConversation(): Long {
+        val conversationId = conversationRepository.createConversation()
+        return conversationId
     }
 
     fun deleteConversation(conversationId: Long) {

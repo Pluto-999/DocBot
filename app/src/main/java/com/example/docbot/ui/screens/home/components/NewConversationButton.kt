@@ -13,14 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.docbot.ui.screens.home.HomeViewModel
 
 @Composable
 fun NewConversationButton(
-    viewModel: HomeViewModel
+    createConversation: () -> Unit
 ) {
     Button(
-        onClick = { viewModel.createConversation() },
+        onClick = { createConversation() },
         modifier = Modifier
             .padding(bottom = 4.dp, top = 8.dp)
             .fillMaxWidth(0.9f)

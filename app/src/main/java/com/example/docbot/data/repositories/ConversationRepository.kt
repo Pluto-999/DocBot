@@ -6,7 +6,7 @@ import com.example.docbot.ui.screens.home.ConversationOrder
 import kotlinx.coroutines.flow.Flow
 
 interface ConversationRepository {
-    fun createConversation()
+    fun createConversation(): Long
     fun deleteConversation(conversationId: Long)
     fun getConversations(
         order: ConversationOrder,

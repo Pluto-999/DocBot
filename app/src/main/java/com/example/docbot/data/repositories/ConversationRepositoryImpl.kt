@@ -11,8 +11,9 @@ import javax.inject.Inject
 class ConversationRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource
 ): ConversationRepository {
-    override fun createConversation() {
-        conversationLocalDataSource.insertConversation()
+    override fun createConversation(): Long {
+        val conversationId = conversationLocalDataSource.insertConversation()
+        return conversationId
     }
 
     override fun deleteConversation(conversationId: Long) {
