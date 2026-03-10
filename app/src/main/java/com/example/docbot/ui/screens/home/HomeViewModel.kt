@@ -41,19 +41,19 @@ class HomeViewModel @Inject constructor(
     // collecting the conversations flow and transforming this into ui specific data (i.e. the state)
     // since this flow gives us list of the conversation data class in data layer
     // but we want this to turn into list of ConversationState
-    fun getConversations() {
+    private fun getConversations() {
         conversationJob?.cancel()
         // we must use viewModel coroutine otherwise we can't use .collect !
         conversationJob = viewModelScope.launch {
             conversationRepository.getConversations(
                 _uiState.value.conversationOrder,
-                _uiState.value.conversationFilter
+                _uiState.value.conversationFilter,
+                _uiState.value.searchQuery
             ).collect { conversations ->
-                val uiConversations = mutableListOf<ConversationState>()
                 val currentDateTime = LocalDateTime.now()
-                for (conversation in conversations) {
 
-                    val latestMessageDateTime = conversation.latestMessage
+                val uiConversations: List<ConversationState> = conversations.map {
+                    val latestMessageDateTime = it.latestMessage
 
                     val daysDiff = Duration.between(latestMessageDateTime, currentDateTime).toDays()
                     val hoursDiff = Duration.between(latestMessageDateTime, currentDateTime).toHours()
@@ -71,16 +71,16 @@ class HomeViewModel @Inject constructor(
                         minutes = minutesDiff
                     )
 
-                    uiConversations.add(
-                        ConversationState(
-                            id = conversation.id,
-                            title = conversation.title,
-                            isFavourite = conversation.favourite,
-                            date = formattedDate,
-                            deleteSoon = oldConversation
-                        )
+                    // create the conversation state
+                    ConversationState(
+                        id = it.id,
+                        title = it.title,
+                        isFavourite = it.favourite,
+                        date = formattedDate,
+                        deleteSoon = oldConversation
                     )
                 }
+
                 _uiState.update { it.copy(conversations = uiConversations) }
             }
         }
@@ -114,10 +114,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateSearchQuery(newQuery: String) {
-        _uiState.update{ it.copy(searchQuery = newQuery) }
-    }
-
     fun toggleFilterMenu(newState: Boolean) {
         _uiState.update { it.copy(filterMenuExpanded = newState) }
     }
@@ -133,6 +129,11 @@ class HomeViewModel @Inject constructor(
 
     fun updateConversationFilter(filter: ConversationFilter) {
         _uiState.update { it.copy(conversationFilter = filter) }
+        getConversations()
+    }
+
+    fun updateSearchQuery(newQuery: String) {
+        _uiState.update{ it.copy(searchQuery = newQuery) }
         getConversations()
     }
 }

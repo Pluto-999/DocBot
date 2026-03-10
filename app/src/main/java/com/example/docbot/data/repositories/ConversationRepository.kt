@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.Flow
 interface ConversationRepository {
     fun createConversation()
     fun deleteConversation(conversationId: Long)
-    fun getConversations(order: ConversationOrder, filter: ConversationFilter): Flow<List<Conversation>>
-//    fun searchForConversation(query: String): Flow<List<Conversation>>
+    fun getConversations(
+        order: ConversationOrder,
+        filter: ConversationFilter,
+        searchQuery: String
+    ): Flow<List<Conversation>>
     fun updateTitle(conversationId: Long, title: String)
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean
 

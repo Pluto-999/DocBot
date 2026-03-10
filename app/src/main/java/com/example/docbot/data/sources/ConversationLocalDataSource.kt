@@ -12,6 +12,8 @@ import com.example.docbot.data.models.Conversation_
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.Message
+import com.example.docbot.ui.screens.home.ConversationFilter
+import com.example.docbot.ui.screens.home.ConversationOrder
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.objectbox.Box
@@ -38,89 +40,59 @@ class ConversationLocalDataSource @Inject constructor(
         conversationBox.put(Conversation())
     }
 
+
     /*** Getting Conversations ***/
 
-    fun getConversations(): Flow<List<Conversation>> {
-        return getConversationsDateDescending()
+    fun getConversations(
+        order: ConversationOrder,
+        filter: ConversationFilter,
+        searchQuery: String
+    ): Flow<List<Conversation>> {
+        val builder = createConversationBuilder(filter, searchQuery)
+
+        return createConversationFlow(builder, order)
     }
 
-
-    // Sorting Conversations
-
-    fun getConversationsAlphabeticallyAscending(): Flow<List<Conversation>> {
-        return conversationBox
-            .query()
-            .order(Conversation_.title)
-            .build()
-            .subscribe()
-            .toFlow()
+    private fun createConversationBuilder(filter: ConversationFilter, searchQuery: String): QueryBuilder<Conversation> {
+        val builder =  when (filter) {
+            ConversationFilter.FAVOURITES ->
+                conversationBox.query(
+                    Conversation_.favourite.equal(true) and
+                        Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                )
+            ConversationFilter.DELETE_SOON -> {
+                val sevenDaysAgoDate = getSevenDaysAgoDate()
+                conversationBox.query(
+                Conversation_.latestMessage.less(sevenDaysAgoDate) and
+                        Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                )
+            }
+            ConversationFilter.NONE ->
+                conversationBox.query(
+                    Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                )
+        }
+        return builder
     }
 
-    fun getConversationsAlphabeticallyDescending(): Flow<List<Conversation>> {
-        return conversationBox
-            .query()
-            .order(Conversation_.title, QueryBuilder.DESCENDING)
-            .build()
-            .subscribe()
-            .toFlow()
-    }
-
-    fun getConversationsDateAscending(): Flow<List<Conversation>> {
-        return conversationBox
-            .query()
-            .order(Conversation_.latestMessage)
-            .build()
-            .subscribe()
-            .toFlow()
-    }
-
-    fun getConversationsDateDescending(): Flow<List<Conversation>> {
-        return conversationBox
-            .query()
-            .order(Conversation_.latestMessage, QueryBuilder.DESCENDING)
-            .build()
-            .subscribe()
-            .toFlow()
-    }
-
-
-    // Filtering Conversations
-
-    fun getFavouriteConversations(): Flow<List<Conversation>> {
-        return conversationBox
-            .query(Conversation_.favourite equal true)
-            .build()
-            .subscribe()
-            .toFlow()
-    }
-
-    fun getSoonToBeDeletedConversations(): Flow<List<Conversation>> {
+    private fun getSevenDaysAgoDate(): Date {
         val sevenDaysAgo = LocalDateTime.now().minusDays(7)
         // from: https://stackoverflow.com/questions/19431234/converting-between-java-time-localdatetime-and-java-util-date
-        val sevenDaysAgoDateFormat =
-            Date.from(sevenDaysAgo.atZone(ZoneId.systemDefault()).toInstant())
-        return conversationBox
-            .query(
-                (Conversation_.latestMessage less (sevenDaysAgoDateFormat)) and
-                        (Conversation_.favourite equal false)
-            )
-            .build()
-            .subscribe()
-            .toFlow()
+        return Date.from(sevenDaysAgo.atZone(ZoneId.systemDefault()).toInstant())
     }
 
-    // Searching Conversations
-
-    fun searchForConversation(search: String): Flow<List<Conversation>> {
-        return conversationBox
-            .query(Conversation_.title equal search)
-            .build()
-            .subscribe()
-            .toFlow()
+    private fun createConversationFlow(builder: QueryBuilder<Conversation>, order: ConversationOrder): Flow<List<Conversation>> {
+        return when (order) {
+            ConversationOrder.DATE_ASC ->
+                builder.order(Conversation_.latestMessage).build().subscribe().toFlow()
+            ConversationOrder.DATE_DESC ->
+                builder.order(Conversation_.latestMessage, QueryBuilder.DESCENDING).build().subscribe().toFlow()
+            ConversationOrder.TITLE_ASC ->
+                builder.order(Conversation_.title).build().subscribe().toFlow()
+            ConversationOrder.TITLE_DESC ->
+                builder.order(Conversation_.title, QueryBuilder.DESCENDING).build().subscribe().toFlow()
+        }
     }
-
-
-    // Get title from id
 
     fun getConversationTitleFromId(id: Long): String? {
         val conversation = conversationBox
@@ -129,6 +101,7 @@ class ConversationLocalDataSource @Inject constructor(
             .findUnique()
         return conversation?.title
     }
+
 
     /*** Updating Conversations ***/
 

@@ -85,7 +85,7 @@ fun HomeScreen(
                     )
                 },
                 favouriteOnClick = {
-                    if (uiState.conversationFilter == ConversationFilter.NONE) {
+                    if (uiState.conversationFilter != ConversationFilter.FAVOURITES) {
                         viewModel.updateConversationFilter(ConversationFilter.FAVOURITES)
                     }
                     else {
@@ -93,7 +93,7 @@ fun HomeScreen(
                     }
                 },
                 deleteSoonOnClick = {
-                    if (uiState.conversationFilter == ConversationFilter.NONE) {
+                    if (uiState.conversationFilter != ConversationFilter.DELETE_SOON) {
                         viewModel.updateConversationFilter(ConversationFilter.DELETE_SOON)
                     }
                     else {
