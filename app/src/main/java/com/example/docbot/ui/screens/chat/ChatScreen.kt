@@ -80,10 +80,7 @@ fun ChatScreen(
                         )
                     }
                     IconButton(
-                        onClick = {
-//                            openFilePickerActivity()
-                        viewModel.toggleDocumentPickerDialog(true)
-                        }
+                        onClick = { viewModel.toggleDocumentPickerDialog(true) }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AttachFile,
