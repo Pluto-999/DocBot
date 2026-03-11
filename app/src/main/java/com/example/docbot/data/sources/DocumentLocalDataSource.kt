@@ -5,6 +5,9 @@ import com.example.docbot.data.models.Conversation_
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.Document_
 import io.objectbox.Box
+import io.objectbox.kotlin.toFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class DocumentLocalDataSource @Inject constructor(
@@ -22,28 +25,38 @@ class DocumentLocalDataSource @Inject constructor(
     }
 
     fun findDocumentHash(hash: String): Boolean {
-        val findDocument = documentBox
+        return getDocumentFromHash(hash) != null
+    }
+
+    private fun getDocumentFromHash(hash: String): Document? {
+        return documentBox
             .query(Document_.contentHash.equal(hash))
             .build()
-            .find()
-
-        if (findDocument.isEmpty()) {
-            return false
-        }
-        else {
-            return true
-        }
+            .findUnique()
     }
 
     // to insert the document, we need the name and hash, as well as the associated conversation (conversationId)
-    fun insertDocument(name: String, hash: String, conversationId: Long): Long {
-        val documentToInsert = Document(name = name, contentHash = hash)
-        val documentId = documentBox.put(documentToInsert)
-        // the conversation "owns" the relationship between the conversation and document
-        // therefore, we also need to access this
+    fun insertNewDocument(name: String, hash: String, conversationId: Long): Long {
+        return documentBox.store.callInTx {
+            val documentToInsert = Document(name = name, contentHash = hash)
+            val documentId = documentBox.put(documentToInsert)
+
+            // the conversation "owns" the relationship between the conversation and document
+            // therefore, we also need to access this
+            val conversationToUpdate = conversationBox.get(conversationId)
+            conversationToUpdate.documents.add(documentToInsert)
+            conversationBox.put(conversationToUpdate)
+
+            documentId // return the documentId
+        }
+    }
+
+    fun linkDocumentToConversation(conversationId: Long, hash: String) {
+        val document = getDocumentFromHash(hash)
         val conversationToUpdate = conversationBox.get(conversationId)
-        conversationToUpdate.documents.add(documentToInsert)
+        if (document != null) {
+            conversationToUpdate.documents.add(document)
+        }
         conversationBox.put(conversationToUpdate)
-        return documentId
     }
 }

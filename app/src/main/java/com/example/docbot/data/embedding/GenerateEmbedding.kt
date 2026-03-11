@@ -1,6 +1,5 @@
 package com.example.docbot.data.embedding
 
-import android.util.Log
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
 import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel

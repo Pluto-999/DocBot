@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import com.example.docbot.data.embedding.generateEmbedding
+import com.example.docbot.data.sources.ConversationLocalDataSource
 import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.google.ai.edge.localagents.rag.chunking.TextChunker
@@ -14,12 +15,14 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import javax.inject.Inject
 
 class DocumentRepositoryImpl @Inject constructor(
+    private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
     private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
     @ApplicationContext private val applicationContext: Context
@@ -27,28 +30,31 @@ class DocumentRepositoryImpl @Inject constructor(
 
     private val contentResolver = applicationContext.contentResolver
 
-    override fun getAllDocumentTitles(conversationId: Long): List<String> {
-        TODO("Not yet implemented")
+    override fun getDocumentTitles(conversationId: Long): Flow<List<String>> {
+        return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
 
-    override suspend fun processDocument(uri: Uri, conversationId: Long): String {
+    override suspend fun processDocument(uri: Uri, conversationId: Long) {
 
         val documentName = getDocumentName(uri)
 
         val extractedText = extractText(uri)
 
-        val hashText = getDocumentHash(extractedText)
-        val documentIsProcessed = documentLocalDataSource.findDocumentHash(hashText)
+        val hashContents = getDocumentHash(extractedText)
+        val documentIsProcessed = documentLocalDataSource.findDocumentHash(hashContents)
 
+        // if the document has been processed, we still need to associate it to the conversation !!
+        if (documentIsProcessed) {
+            documentLocalDataSource.linkDocumentToConversation(conversationId, hashContents)
+        }
         // if the document hasn't been processed, then we need to add it to the document table,
         // along with processing and adding all of its chunks to the documentChunk table !
-        if (!documentIsProcessed) {
-
+        else {
             // first, insert the document to the document table, returning the document id
             // this document id can be used for adding the chunks so we know the associated document
-            val documentId = documentLocalDataSource.insertDocument(
+            val documentId = documentLocalDataSource.insertNewDocument(
                 documentName,
-                hashText,
+                hashContents,
                 conversationId
             )
 
@@ -62,8 +68,6 @@ class DocumentRepositoryImpl @Inject constructor(
                 documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
             }
         }
-
-        return documentName
     }
 
     private fun getDocumentName(uri: Uri): String {
@@ -105,67 +109,9 @@ class DocumentRepositoryImpl @Inject constructor(
         }
     }
 
-//    private fun chunkText(text: String): MutableList<String> {
-//        // base case
-//        if (getTokenLength(text) <= 512) {
-//            return mutableListOf(text)
-//        }
-//
-//        val chunks = mutableListOf<String>()
-//
-//        val paragraphSplit = text.split("\\n\\n")
-//        for (split in paragraphSplit) {
-//            chunks += chunkText(split)
-//        }
-//
-//        val lineSplit = text.split("\\n")
-//        for (split in lineSplit) {
-//            chunks += chunkText(split)
-//        }
-//
-//        val spaceSplit = text.split(" ")
-//        for (split in spaceSplit) {
-//            chunks += split
-//        }
-//
-//        return chunks
-//    }
-
-//    private fun chunkText(text: String): MutableList<String> {
-//        val chunks = mutableListOf<String>()
-//
-//        val paragraphSplit = text.split("\n\n")
-//        for (split in paragraphSplit) {
-//            if (getTokenLength(split) <= 512) {
-//                chunks += split
-//            }
-//            else {
-//                val lineSplit = text.split("\n")
-//                for (split in lineSplit) {
-//                    if (getTokenLength(split) <= 512) {
-//                        chunks += split
-//                    }
-//                    else {
-//                        val spaceSplit = text.split(" ")
-//                        for (split in spaceSplit) {
-//                            chunks += split
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return chunks
-//    }
-
     private fun chunkText(text: String): List<String> {
         return TextChunker().chunk(text, 512, 30)
     }
-
-
-//    private fun getTokenLength(chunk: String): Int {
-//        return chunk.length / 4
-//    }
 
     private fun getDocumentHash(text: String): String {
         val digest = MessageDigest.getInstance("SHA-256")

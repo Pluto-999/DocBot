@@ -124,7 +124,8 @@ fun ChatScreen(
                 onDismissRequest = {
                     viewModel.toggleDocumentPickerDialog(false)
                 },
-                openDocumentPicker = { openFilePickerActivity() }
+                openDocumentPicker = { openFilePickerActivity() },
+                documentNames = uiState.documentNames
             )
         }
     }

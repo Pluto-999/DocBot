@@ -83,11 +83,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDocumentRepository(
+        conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
         @ApplicationContext applicationContext: Context
     ): DocumentRepository {
         return DocumentRepositoryImpl(
+            conversationLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
             applicationContext

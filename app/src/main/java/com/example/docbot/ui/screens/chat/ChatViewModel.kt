@@ -1,7 +1,6 @@
 package com.example.docbot.ui.screens.chat
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
 @AssistedFactory
 interface ChatViewModelFactory {
     fun create(conversationId: Long): ChatViewModel
@@ -30,7 +28,7 @@ class ChatViewModel @AssistedInject constructor(
     private val conversationRepository: ConversationRepository,
     private val messageRepository: MessageRepository,
     private val documentRepository: DocumentRepository,
-    @Assisted val conversationId: Long
+    @Assisted private val conversationId: Long
 ): ViewModel() {
 
     // using StateFlow means the UI constantly has access to the up-to-date state
@@ -41,21 +39,20 @@ class ChatViewModel @AssistedInject constructor(
     init {
         getConversationTitle()
         getMessages()
+        getDocumentNames()
     }
 
     private fun getMessages() {
         // we must use viewModel coroutine otherwise we can't use .collect !
         viewModelScope.launch {
             messageRepository.getMessages(conversationId).collect { messages ->
-                val uiMessages = mutableListOf<MessageState>()
-                for (message in messages) {
-                    uiMessages.add(
-                        MessageState(
-                            contents = message.contents,
-                            messageType = message.messageType
-                        )
+                val uiMessages: List<MessageState> = messages.map {
+                    MessageState(
+                        contents = it.contents,
+                        messageType = it.messageType
                     )
                 }
+
                 _uiState.update { it.copy(messages = uiMessages) }
             }
         }
@@ -73,15 +70,6 @@ class ChatViewModel @AssistedInject constructor(
     fun updateConversationTitle(newTitle: String) {
         _uiState.update { it.copy(title = newTitle) }
         conversationRepository.updateTitle(conversationId, newTitle)
-    }
-
-    fun toggleDocumentPickerDialog(isOpen: Boolean) {
-        _uiState.update { it.copy(openDocumentPickerDialog = isOpen) }
-    }
-
-    fun getDocumentNames() {
-        val documentNames = documentRepository.getAllDocumentTitles(conversationId)
-        _uiState.update { it.copy(documentNames = documentNames) }
     }
 
     fun sendMessage() {
@@ -106,11 +94,24 @@ class ChatViewModel @AssistedInject constructor(
         _uiState.update { it.copy(currentUserMessage = newMessage) }
     }
 
+    fun toggleDocumentPickerDialog(isOpen: Boolean) {
+        _uiState.update { it.copy(openDocumentPickerDialog = isOpen) }
+    }
+
     fun processDocument(uri: Uri?) {
         if (uri != null) {
             viewModelScope.launch(Dispatchers.Default) {
                 documentRepository.processDocument(uri, conversationId)
             }
+        }
+    }
+
+    fun getDocumentNames() {
+        viewModelScope.launch {
+            documentRepository.getDocumentTitles(conversationId)
+                .collect { documentNames ->
+                    _uiState.update { it.copy(documentNames = documentNames) }
+                }
         }
     }
 }

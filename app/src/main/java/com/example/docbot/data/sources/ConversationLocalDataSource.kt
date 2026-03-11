@@ -23,6 +23,7 @@ import io.objectbox.kotlin.less
 import io.objectbox.kotlin.toFlow
 import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Date
@@ -100,6 +101,25 @@ class ConversationLocalDataSource @Inject constructor(
             .build()
             .findUnique()
         return conversation?.title
+    }
+
+    /** Document Related Stuff **/
+
+    // for UI to display
+    fun getDocumentTitlesFromId(conversationId: Long): Flow<List<String>> {
+        return conversationBox
+            .query(Conversation_.id.equal(conversationId))
+            .build()
+            .subscribe()
+            .toFlow()
+            .map { conversations ->
+                conversations.flatMap { conversation ->
+                    conversation.documents.map { it.name }
+                }
+            }
+        // first map is for the Flow - transforms each emission
+        // second map (flatMap) is to flatten List<ToMany<Document>> to List<Document>
+        // third map is for each document, just getting its name
     }
 
 
