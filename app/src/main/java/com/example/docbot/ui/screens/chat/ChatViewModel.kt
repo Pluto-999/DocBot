@@ -1,6 +1,7 @@
 package com.example.docbot.ui.screens.chat
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.repositories.ConversationRepository
@@ -95,18 +96,26 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     fun toggleDocumentPickerDialog(isOpen: Boolean) {
-        _uiState.update { it.copy(openDocumentPickerDialog = isOpen) }
+        _uiState.update { it.copy(openDocumentPickerSheet = isOpen) }
     }
 
     fun processDocument(uri: Uri?) {
         if (uri != null) {
+//            _uiState.update { it.copy(documentProcessing = true) }
             viewModelScope.launch(Dispatchers.Default) {
+
                 val successfulProcess = documentRepository.processDocument(uri, conversationId)
                 if (!successfulProcess) {
+                    _uiState.update { it.copy(openDocumentPickerSheet = false) }
                     _uiState.value.snackbarHostState.showSnackbar(
                         "You can only have up to 5 documents per conversation"
                     )
+//                    _uiState.update { it.copy(documentProcessing = false) }
                 }
+//                else {
+//                    _uiState.update { it.copy(documentProcessing = false) }
+//                    Log.e("PROCESSING", "COMPLETE !")
+//                }
             }
         }
     }
