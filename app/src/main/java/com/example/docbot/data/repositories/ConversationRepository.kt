@@ -13,9 +13,8 @@ interface ConversationRepository {
         filter: ConversationFilter,
         searchQuery: String
     ): Flow<List<Conversation>>
+    fun getConversationTitle(id: Long): String?
     fun updateTitle(conversationId: Long, title: String)
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean
-
-    // for chat page
-    fun getConversationTitle(id: Long): String?
+    fun scheduleOldConversationsDeletion()
 }

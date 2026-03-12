@@ -59,9 +59,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideConversationRepository(
-        conversationLocalDataSource: ConversationLocalDataSource
+        conversationLocalDataSource: ConversationLocalDataSource,
+        @ApplicationContext applicationContext: Context
     ): ConversationRepository {
-        return ConversationRepositoryImpl(conversationLocalDataSource)
+        return ConversationRepositoryImpl(conversationLocalDataSource, applicationContext)
     }
 
     @Provides

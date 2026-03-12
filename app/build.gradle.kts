@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation3.runtime)
@@ -76,6 +77,7 @@ dependencies {
     implementation(libs.androidx.protobuf)
     implementation(libs.androidx.pdfbox)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -83,7 +85,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation("io.objectbox:objectbox-android-objectbrowser:5.1.0")
+    debugImplementation("io.objectbox:objectbox-android-objectbrowser:5.1.0") // for development/testing
 }
 
-apply(plugin = "io.objectbox")
+apply(plugin = "io.objectbox") // moved here for development/testing - move back up to top once done
