@@ -122,6 +122,11 @@ class ConversationLocalDataSource @Inject constructor(
         // third map is for each document, just getting its name
     }
 
+    fun getDocumentCount(conversationId: Long): Int {
+        val conversation = conversationBox.get(conversationId)
+        return conversation.documents.size
+    }
+
 
     /*** Updating Conversations ***/
 

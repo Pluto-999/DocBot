@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import javax.inject.Inject
 
+const val MAX_DOCUMENTS = 5
+
 class DocumentRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
@@ -34,7 +36,13 @@ class DocumentRepositoryImpl @Inject constructor(
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
 
-    override suspend fun processDocument(uri: Uri, conversationId: Long) {
+    override suspend fun processDocument(uri: Uri, conversationId: Long): Boolean {
+
+        // first, check if we are at max documents already (5)
+        val documentCount = conversationLocalDataSource.getDocumentCount(conversationId)
+        if (documentCount >= MAX_DOCUMENTS) {
+            return false // unsuccessful process, since we are already at max documents !
+        }
 
         val documentName = getDocumentName(uri)
 
@@ -68,6 +76,9 @@ class DocumentRepositoryImpl @Inject constructor(
                 documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
             }
         }
+
+        // successful process
+        return true
     }
 
     private fun getDocumentName(uri: Uri): String {

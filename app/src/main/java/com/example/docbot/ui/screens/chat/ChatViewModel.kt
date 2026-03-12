@@ -101,7 +101,12 @@ class ChatViewModel @AssistedInject constructor(
     fun processDocument(uri: Uri?) {
         if (uri != null) {
             viewModelScope.launch(Dispatchers.Default) {
-                documentRepository.processDocument(uri, conversationId)
+                val successfulProcess = documentRepository.processDocument(uri, conversationId)
+                if (!successfulProcess) {
+                    _uiState.value.snackbarHostState.showSnackbar(
+                        "You can only have up to 5 documents per conversation"
+                    )
+                }
             }
         }
     }
