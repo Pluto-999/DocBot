@@ -21,7 +21,7 @@ class MessageRepositoryImpl @Inject constructor(
     private val engine: Engine
 ) : MessageRepository {
 
-    var engineInitialised = false
+    private var engineInitialised = false
 
     override fun getMessages(conversationId: Long): Flow<List<Message>> {
         return messageLocalDataSource.getMessages(conversationId)
@@ -122,7 +122,7 @@ class MessageRepositoryImpl @Inject constructor(
         )
     }
 
-    private suspend fun getInitialisedEngine(): Engine {
+    private fun getInitialisedEngine(): Engine {
         if (!engineInitialised) {
             engine.initialize()
             engineInitialised = true

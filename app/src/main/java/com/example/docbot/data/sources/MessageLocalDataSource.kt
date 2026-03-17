@@ -20,10 +20,18 @@ class MessageLocalDataSource @Inject constructor(
         messageContents: String,
         messageType: MessageType
     ) {
+
         val newMessage = Message(contents = messageContents, messageType = messageType)
+        val dateTime = newMessage.timestamp
+
         val conversation = conversationBox.get(conversationId)
+
+        conversation.latestMessage = dateTime
+
         newMessage.conversation.setTarget(conversation)
+
         messageBox.put(newMessage)
+        conversationBox.put(conversation)
     }
 
     fun getMessages(conversationId: Long): Flow<List<Message>> {
