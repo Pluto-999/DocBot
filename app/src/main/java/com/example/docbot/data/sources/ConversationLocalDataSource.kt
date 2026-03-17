@@ -55,6 +55,7 @@ class ConversationLocalDataSource @Inject constructor(
             ConversationFilter.DELETE_SOON -> {
                 conversationBox.query(
                     Conversation_.latestMessage.less(getSevenDaysAgoDate()) and
+                    Conversation_.favourite.equal(false) and
                     Conversation_.title.startsWith(searchQuery, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 )
             }
