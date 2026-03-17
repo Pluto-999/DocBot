@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.docbot.ui.screens.chat.components.DocumentLoading
 import com.example.docbot.ui.screens.chat.components.DocumentPicker
 import com.example.docbot.ui.screens.chat.components.MessageList
 import com.example.docbot.ui.screens.chat.components.MessageTextBox
@@ -75,7 +74,11 @@ fun ChatScreen(
                         )
                     }
                     IconButton(
-                        onClick = { viewModel.toggleDocumentPickerDialog(true) }
+                        onClick = {
+                            if (!uiState.documentProcessing) {
+                                viewModel.toggleDocumentPickerDialog(true)
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AttachFile,
@@ -103,7 +106,8 @@ fun ChatScreen(
             MessageTextBox(
                 value = uiState.currentUserMessage,
                 onValueChange = { viewModel.updateCurrentMessage(newMessage = it) },
-                createMessage = { viewModel.sendMessage() }
+                createMessage = { viewModel.sendMessage() },
+                enabled = !uiState.documentProcessing
             )
         }
 
@@ -127,12 +131,8 @@ fun ChatScreen(
             )
         }
 
-//        if (uiState.documentProcessing) {
-//            CircularProgressIndicator(
-//                modifier = Modifier.width(64.dp),
-//                color = MaterialTheme.colorScheme.secondary,
-//                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-//            )
-//        }
+        if (uiState.documentProcessing) {
+            DocumentLoading()
+        }
     }
 }

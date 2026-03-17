@@ -3,9 +3,9 @@ package com.example.docbot.data.sources
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.DocumentChunk_
-import com.example.docbot.data.models.Document_
 import com.google.common.collect.ImmutableList
 import io.objectbox.Box
+import io.objectbox.kotlin.and
 import javax.inject.Inject
 
 class DocumentChunkLocalDataSource @Inject constructor(
@@ -16,14 +16,14 @@ class DocumentChunkLocalDataSource @Inject constructor(
         documentIds: List<Long>,
         promptEmbedding: ImmutableList<Float>
     ): String {
-        val builder = documentChunkBox.query(DocumentChunk_.embedding.nearestNeighbors(
-            promptEmbedding.toFloatArray(),
-            1))
+        val builder = documentChunkBox.query(
+            DocumentChunk_.embedding.nearestNeighbors(
+                promptEmbedding.toFloatArray(),
+                10) and
+                    DocumentChunk_.documentId.oneOf(documentIds.toLongArray())
+        )
 
-        builder.link(DocumentChunk_.document)
-            .apply(Document_.id.oneOf(documentIds.toLongArray()))
-
-        return builder.build().findUnique()?.chunk ?: ""
+        return builder.build().findFirst()?.chunk ?: ""
     }
 
     fun insertDocumentChunk(

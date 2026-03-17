@@ -5,10 +5,17 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.docbot.data.embedding.generateEmbedding
 import com.example.docbot.data.sources.ConversationLocalDataSource
 import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.example.docbot.workers.ProcessDocumentExpeditedWorker
 import com.google.ai.edge.localagents.rag.chunking.TextChunker
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
@@ -36,7 +43,36 @@ class DocumentRepositoryImpl @Inject constructor(
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
 
-    override suspend fun processDocument(uri: Uri, conversationId: Long): Boolean {
+    // this method creates the WorkRequest from the ProcessDocumentWorker class
+    override fun processDocument(uri: Uri, conversationId: Long): Flow<WorkInfo?> {
+        val processRequest = OneTimeWorkRequestBuilder<ProcessDocumentExpeditedWorker>()
+            .setInputData(
+                workDataOf(
+                    "uri" to uri.toString(),
+                    "conversationId" to conversationId
+                )
+            )
+            .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
+            .build()
+
+
+        val workManager = WorkManager.getInstance(applicationContext)
+
+        workManager.enqueueUniqueWork(
+            uniqueWorkName = uri.toString(),
+            existingWorkPolicy = ExistingWorkPolicy.KEEP, // keep existing work and ignore new work
+            request = processRequest
+        )
+
+        val workStatus = workManager.getWorkInfoByIdFlow(processRequest.id)
+
+        return workStatus
+    }
+
+
+    // this function is the logic that the ProcessDocumentWorker needs to carry out !!
+    // (therefore, the ProcessDocumentWorker just calls this method)
+    override suspend fun processDocumentImpl(uri: Uri, conversationId: Long): Boolean {
 
         // first, check if we are at max documents already (5)
         val documentCount = conversationLocalDataSource.getDocumentCount(conversationId)
@@ -98,7 +134,7 @@ class DocumentRepositoryImpl @Inject constructor(
         return documentName
     }
 
-    private suspend fun extractText(uri: Uri): String {
+    private fun extractText(uri: Uri): String {
         val pdfInputStream = contentResolver.openInputStream(uri)
 
         PDFBoxResourceLoader.init(applicationContext)

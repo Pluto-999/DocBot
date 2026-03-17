@@ -1,9 +1,9 @@
 package com.example.docbot.ui.screens.chat
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import com.example.docbot.data.repositories.ConversationRepository
 import com.example.docbot.data.repositories.DocumentRepository
 import com.example.docbot.data.repositories.MessageRepository
@@ -101,21 +101,25 @@ class ChatViewModel @AssistedInject constructor(
 
     fun processDocument(uri: Uri?) {
         if (uri != null) {
-//            _uiState.update { it.copy(documentProcessing = true) }
-            viewModelScope.launch(Dispatchers.Default) {
+            _uiState.update { it.copy(
+                documentProcessing = true,
+                openDocumentPickerSheet = false
+            ) }
 
-                val successfulProcess = documentRepository.processDocument(uri, conversationId)
-                if (!successfulProcess) {
-                    _uiState.update { it.copy(openDocumentPickerSheet = false) }
-                    _uiState.value.snackbarHostState.showSnackbar(
-                        "You can only have up to 5 documents per conversation"
-                    )
-//                    _uiState.update { it.copy(documentProcessing = false) }
+            viewModelScope.launch(Dispatchers.Default) {
+                val documentStatusFlow = documentRepository.processDocument(uri, conversationId)
+                documentStatusFlow.collect { workInfo ->
+                    val workState = workInfo?.state
+                    if (workState == WorkInfo.State.SUCCEEDED) {
+                        _uiState.update { it.copy(documentProcessing = false) }
+                    }
+                    else if (workState == WorkInfo.State.FAILED) {
+                        _uiState.update { it.copy(documentProcessing = false) }
+                        _uiState.value.snackbarHostState.showSnackbar(
+                            "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
+                        )
+                    }
                 }
-//                else {
-//                    _uiState.update { it.copy(documentProcessing = false) }
-//                    Log.e("PROCESSING", "COMPLETE !")
-//                }
             }
         }
     }

@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.docbot"
-        minSdk = 26
+        minSdk = 31 // Android 12+
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

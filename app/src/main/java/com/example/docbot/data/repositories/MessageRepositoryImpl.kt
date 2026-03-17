@@ -1,5 +1,7 @@
 package com.example.docbot.data.repositories
 
+import android.os.Debug
+import android.util.Log
 import com.example.docbot.data.embedding.generateEmbedding
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
@@ -9,6 +11,7 @@ import com.example.docbot.data.sources.MessageLocalDataSource
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 
 class MessageRepositoryImpl @Inject constructor(
@@ -51,6 +54,14 @@ class MessageRepositoryImpl @Inject constructor(
         )
 
         return messageFlow
+            .onCompletion {
+                // TESTING MEMORY USAGE OF INFERENCE !!
+                val mi = Debug.MemoryInfo()
+                Debug.getMemoryInfo(mi)
+                Log.e("MEMORY", "Native: ${mi.nativePss} KB")
+
+                conversation.close()
+            }
     }
 
     private suspend fun addMessageContexts(

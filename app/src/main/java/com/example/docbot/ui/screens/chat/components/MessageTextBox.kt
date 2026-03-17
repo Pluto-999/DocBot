@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 fun MessageTextBox(
     value: String,
     onValueChange: (String) -> Unit,
-    createMessage: () -> Unit
+    createMessage: () -> Unit,
+    enabled: Boolean
 ) {
     OutlinedTextField(
         value = value,
@@ -23,6 +24,7 @@ fun MessageTextBox(
         placeholder = {
             Text("Enter message ...")
         },
+        enabled = enabled,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done
         ),

@@ -73,9 +73,9 @@ class ConversationRepositoryImpl @Inject constructor(
         WorkManager
             .getInstance(applicationContext)
             .enqueueUniquePeriodicWork(
-                "deleteOldConversations",
-                ExistingPeriodicWorkPolicy.REPLACE,
-                deleteRequest
+                uniqueWorkName = "deleteOldConversations",
+                existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
+                request = deleteRequest
             )
 
         // One time request for testing only !!!

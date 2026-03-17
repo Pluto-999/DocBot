@@ -11,7 +11,7 @@ data class ChatUiState(
     val currentUserMessage: String = "",
     val currentResponseMessage: String = "",
     val documentNames: List<String> = listOf(),
-//    val documentProcessing: Boolean = false,
+    val documentProcessing: Boolean = false,
     val snackbarHostState: SnackbarHostState = SnackbarHostState()
 )
 
