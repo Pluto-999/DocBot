@@ -5,7 +5,8 @@ import androidx.work.WorkInfo
 import kotlinx.coroutines.flow.Flow
 
 interface DocumentRepository {
-    fun processDocument(uri: Uri, conversationId: Long): Flow<WorkInfo?>
+    fun processDocument(uri: Uri, conversationId: Long)
     suspend fun processDocumentImpl(uri: Uri, conversationId: Long): Boolean
     fun getDocumentTitles(conversationId: Long): Flow<List<String>>
+    fun getDocumentProcessingFlow(conversationId: Long): Flow<WorkInfo?>
 }

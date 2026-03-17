@@ -23,9 +23,11 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.UUID
 import javax.inject.Inject
 
 const val MAX_DOCUMENTS = 5
@@ -38,13 +40,14 @@ class DocumentRepositoryImpl @Inject constructor(
 ) : DocumentRepository {
 
     private val contentResolver = applicationContext.contentResolver
+    private val workManager = WorkManager.getInstance(applicationContext)
 
     override fun getDocumentTitles(conversationId: Long): Flow<List<String>> {
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
 
     // this method creates the WorkRequest from the ProcessDocumentWorker class
-    override fun processDocument(uri: Uri, conversationId: Long): Flow<WorkInfo?> {
+    override fun processDocument(uri: Uri, conversationId: Long) {
         val processRequest = OneTimeWorkRequestBuilder<ProcessDocumentExpeditedWorker>()
             .setInputData(
                 workDataOf(
@@ -55,18 +58,17 @@ class DocumentRepositoryImpl @Inject constructor(
             .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
             .build()
 
-
-        val workManager = WorkManager.getInstance(applicationContext)
-
         workManager.enqueueUniqueWork(
-            uniqueWorkName = uri.toString(),
+            uniqueWorkName = conversationId.toString(),
             existingWorkPolicy = ExistingWorkPolicy.KEEP, // keep existing work and ignore new work
             request = processRequest
         )
+    }
 
-        val workStatus = workManager.getWorkInfoByIdFlow(processRequest.id)
-
-        return workStatus
+    override fun getDocumentProcessingFlow(conversationId: Long): Flow<WorkInfo?> {
+        return workManager
+            .getWorkInfosForUniqueWorkFlow(conversationId.toString())
+            .map { it.firstOrNull() }
     }
 
 

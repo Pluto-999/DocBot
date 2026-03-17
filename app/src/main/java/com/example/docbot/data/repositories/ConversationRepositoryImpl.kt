@@ -3,7 +3,6 @@ package com.example.docbot.data.repositories
 import android.content.Context
 import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.docbot.data.models.Conversation
@@ -25,7 +24,11 @@ class ConversationRepositoryImpl @Inject constructor(
         return conversationId
     }
 
+    private val workManager = WorkManager.getInstance(applicationContext)
+
     override fun deleteConversation(conversationId: Long) {
+        // need to cancel the work that is processing the document associated to this conversation
+        workManager.cancelUniqueWork(conversationId.toString())
         conversationLocalDataSource.manuallyDeleteConversation(conversationId)
     }
 

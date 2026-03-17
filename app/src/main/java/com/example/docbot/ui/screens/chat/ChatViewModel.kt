@@ -41,6 +41,7 @@ class ChatViewModel @AssistedInject constructor(
         getConversationTitle()
         getMessages()
         getDocumentNames()
+        getDocumentProcessingState()
     }
 
     private fun getMessages() {
@@ -101,24 +102,32 @@ class ChatViewModel @AssistedInject constructor(
 
     fun processDocument(uri: Uri?) {
         if (uri != null) {
-            _uiState.update { it.copy(
-                documentProcessing = true,
-                openDocumentPickerSheet = false
-            ) }
-
+            _uiState.update { it.copy(openDocumentPickerSheet = false) }
             viewModelScope.launch(Dispatchers.Default) {
-                val documentStatusFlow = documentRepository.processDocument(uri, conversationId)
-                documentStatusFlow.collect { workInfo ->
-                    val workState = workInfo?.state
-                    if (workState == WorkInfo.State.SUCCEEDED) {
+                documentRepository.processDocument(uri, conversationId)
+            }
+        }
+    }
+
+    private fun getDocumentProcessingState() {
+        viewModelScope.launch {
+            val documentProgress = documentRepository.getDocumentProcessingFlow(conversationId)
+            documentProgress.collect { workInfo ->
+                val workState = workInfo?.state
+                when (workState) {
+                    WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
+                        _uiState.update { it.copy(documentProcessing = true) }
+                    }
+                    WorkInfo.State.SUCCEEDED -> {
                         _uiState.update { it.copy(documentProcessing = false) }
                     }
-                    else if (workState == WorkInfo.State.FAILED) {
+                    WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
                         _uiState.update { it.copy(documentProcessing = false) }
                         _uiState.value.snackbarHostState.showSnackbar(
                             "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
                         )
                     }
+                    else -> {}
                 }
             }
         }
