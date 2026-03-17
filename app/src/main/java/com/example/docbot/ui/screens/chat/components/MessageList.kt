@@ -3,9 +3,12 @@ package com.example.docbot.ui.screens.chat.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,23 +24,29 @@ import androidx.compose.ui.unit.dp
 import com.example.docbot.data.models.MessageType
 import com.example.docbot.ui.screens.chat.MessageState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MessageList(
     messages: List<MessageState>,
     currentResponse: String,
     modifier: Modifier = Modifier
 ) {
+    // scrolling to bottom of list
     val listState = rememberLazyListState()
+    val isImeVisible = WindowInsets.isImeVisible
 
-    LaunchedEffect(messages.size) {
-        listState.animateScrollToItem(messages.size)
+    LaunchedEffect(isImeVisible) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size)
+        }
     }
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 12.dp),
         state = listState,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         items(messages) { message ->
             if (message.messageType == MessageType.PROMPT) {

@@ -27,17 +27,18 @@ class MessageRepositoryImpl @Inject constructor(
         return messageLocalDataSource.getMessages(conversationId)
     }
 
-    override suspend fun sendMessage(conversationId: Long, message: String):
-            Flow<com.google.ai.edge.litertlm.Message>
-    {
-        // add user's message
+    override fun createPrompt(conversationId: Long, message: String) {
         messageLocalDataSource.insertMessage(
             conversationId,
             message,
             MessageType.PROMPT
         )
+    }
 
-        // generate response from the model
+    override suspend fun generateResponse(conversationId: Long, message: String):
+            Flow<com.google.ai.edge.litertlm.Message>
+    {
+
         val initialisedEngine = getInitialisedEngine()
         val conversation = initialisedEngine.createConversation()
 

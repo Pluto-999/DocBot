@@ -75,9 +75,17 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     fun sendMessage() {
-        viewModelScope.launch {
+        // first, add the prompt to the database
+        val messageToSend = _uiState.value.currentUserMessage
+
+        messageRepository.createPrompt(conversationId, messageToSend)
+
+        _uiState.update { it.copy(currentUserMessage = "") }
+
+        // then, in the coroutine, generate the response
+        viewModelScope.launch(Dispatchers.Default) {
             messageRepository
-                .sendMessage(conversationId, _uiState.value.currentUserMessage)
+                .generateResponse(conversationId, messageToSend)
                 .onCompletion {
                     val response = _uiState.value.currentResponseMessage
                     messageRepository.saveResponse(conversationId, response)
@@ -89,7 +97,6 @@ class ChatViewModel @AssistedInject constructor(
                     }
                 }
         }
-        _uiState.update { it.copy(currentUserMessage = "") }
     }
 
     fun updateCurrentMessage(newMessage: String) {
