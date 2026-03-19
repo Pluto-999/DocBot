@@ -7,7 +7,8 @@ import androidx.work.WorkerParameters
 import com.example.docbot.data.repositories.DocumentRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import androidx.core.net.toUri
+import com.example.docbot.data.models.ProcessingStatus
+import java.io.File
 
 @HiltWorker
 class ProcessDocumentExpeditedWorker @AssistedInject constructor(
@@ -22,27 +23,38 @@ class ProcessDocumentExpeditedWorker @AssistedInject constructor(
 //    }
 
     override suspend fun doWork(): Result {
-        val uriString = inputData.getString("uri")
-        val uri = uriString?.toUri() ?: return Result.failure()
+        val filePath = inputData.getString("tempFilePath") ?: return Result.failure()
 
-        val conversationId = inputData.getLong("conversationId", -1)
-        if (conversationId < 0) {
+        val documentId = inputData.getLong("documentId", -1)
+        if (documentId < 0) {
+            File(filePath).delete()
             return Result.failure()
         }
 
-        val successfulProcess = documentRepository.processDocumentImpl(uri, conversationId)
-        if (!successfulProcess) {
+        try {
+            val documentContents = File(filePath).readText()
+
+            documentRepository.processChunks(documentId, documentContents)
+
+            // now processing is done, update the document processing value
+            documentRepository.updateProcessingStatus(documentId, ProcessingStatus.COMPLETED)
+
+            return Result.success()
+        }
+        catch (e: Exception) {
+            documentRepository.updateProcessingStatus(documentId, ProcessingStatus.FAILED)
             return Result.failure()
         }
+        finally {
+            File(filePath).delete()
+        }
+    }
 
-        // needed by docs apparently -- idk if needed ??
+    // needed by docs apparently -- idk if needed ??
 //        try {
 //            setForeground(getForegroundInfo())
 //        }
 //        catch (e: ForegroundServiceStartNotAllowedException) {
 //            Log.e("setForeground", e.toString())
 //        }
-
-        return Result.success()
-    }
 }

@@ -2,11 +2,13 @@ package com.example.docbot.data.repositories
 
 import android.net.Uri
 import androidx.work.WorkInfo
+import com.example.docbot.data.models.ProcessingStatus
 import kotlinx.coroutines.flow.Flow
 
 interface DocumentRepository {
-    fun processDocument(uri: Uri, conversationId: Long)
-    suspend fun processDocumentImpl(uri: Uri, conversationId: Long): Boolean
+    suspend fun processDocument(uri: Uri, conversationId: Long): Boolean
+    suspend fun processChunks(documentId: Long, documentContents: String)
+    fun updateProcessingStatus(documentId: Long, processingStatus: ProcessingStatus)
     fun getDocumentTitles(conversationId: Long): Flow<List<String>>
-    fun getDocumentProcessingFlow(conversationId: Long): Flow<WorkInfo?>
+    fun getDocumentProcessingFlow(conversationId: Long): Flow<List<ProcessingStatus>>
 }

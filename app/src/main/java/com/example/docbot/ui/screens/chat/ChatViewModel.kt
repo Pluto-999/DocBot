@@ -3,7 +3,7 @@ package com.example.docbot.ui.screens.chat
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
+import com.example.docbot.data.models.ProcessingStatus
 import com.example.docbot.data.repositories.ConversationRepository
 import com.example.docbot.data.repositories.DocumentRepository
 import com.example.docbot.data.repositories.MessageRepository
@@ -111,32 +111,25 @@ class ChatViewModel @AssistedInject constructor(
         if (uri != null) {
             _uiState.update { it.copy(openDocumentPickerSheet = false) }
             viewModelScope.launch(Dispatchers.Default) {
-                documentRepository.processDocument(uri, conversationId)
+                val successfulInitialProcess = documentRepository.processDocument(uri, conversationId)
+                if (!successfulInitialProcess) {
+                    _uiState.value.snackbarHostState.showSnackbar(
+                        "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
+                    )
+                }
             }
         }
     }
 
     private fun getDocumentProcessingState() {
         viewModelScope.launch {
-            val documentProgress = documentRepository.getDocumentProcessingFlow(conversationId)
-            documentProgress.collect { workInfo ->
-                val workState = workInfo?.state
-                when (workState) {
-                    WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED -> {
-                        _uiState.update { it.copy(documentProcessing = true) }
+            documentRepository.getDocumentProcessingFlow(conversationId)
+                .collect { processingStatuses ->
+                    val isProcessing = processingStatuses.any {
+                        it == ProcessingStatus.PROCESSING
                     }
-                    WorkInfo.State.SUCCEEDED -> {
-                        _uiState.update { it.copy(documentProcessing = false) }
-                    }
-                    WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
-                        _uiState.update { it.copy(documentProcessing = false) }
-                        _uiState.value.snackbarHostState.showSnackbar(
-                            "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
-                        )
-                    }
-                    else -> {}
+                    _uiState.update { it.copy(documentProcessing = isProcessing) }
                 }
-            }
         }
     }
 

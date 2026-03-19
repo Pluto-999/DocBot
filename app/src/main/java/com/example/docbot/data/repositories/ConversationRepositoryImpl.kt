@@ -7,6 +7,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.sources.ConversationLocalDataSource
+import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.ui.screens.home.ConversationFilter
 import com.example.docbot.ui.screens.home.ConversationOrder
 import com.example.docbot.workers.ConversationDeletionWorker
@@ -17,18 +18,33 @@ import javax.inject.Inject
 
 class ConversationRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
+    private val documentLocalDataSource: DocumentLocalDataSource,
     @ApplicationContext private val applicationContext: Context
 ): ConversationRepository {
+
+    private val workManager = WorkManager.getInstance(applicationContext)
+
     override fun createConversation(): Long {
         val conversationId = conversationLocalDataSource.insertConversation()
         return conversationId
     }
 
-    private val workManager = WorkManager.getInstance(applicationContext)
-
     override fun deleteConversation(conversationId: Long) {
         // need to cancel the work that is processing the document associated to this conversation
-        workManager.cancelUniqueWork(conversationId.toString())
+
+        // get the documents associated with this conversation
+        val documents = conversationLocalDataSource.getDocuments(conversationId)
+
+        for (document in documents) {
+            // get the conversations that each document is associated with
+            val associatedConversations = documentLocalDataSource.getConversationCountForDocument(document)
+            // if it is just 1 conversation, that means it is the current conversation !!!
+            // therefore, can cancel the work
+            if (associatedConversations == 1) {
+                workManager.cancelUniqueWork(document.contentHash)
+            }
+        }
+
         conversationLocalDataSource.manuallyDeleteConversation(conversationId)
     }
 

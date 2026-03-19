@@ -8,10 +8,10 @@ import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.docbot.data.embedding.generateEmbedding
+import com.example.docbot.data.models.ProcessingStatus
 import com.example.docbot.data.sources.ConversationLocalDataSource
 import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
@@ -23,11 +23,10 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.util.UUID
 import javax.inject.Inject
 
 const val MAX_DOCUMENTS = 5
@@ -46,37 +45,9 @@ class DocumentRepositoryImpl @Inject constructor(
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
 
-    // this method creates the WorkRequest from the ProcessDocumentWorker class
-    override fun processDocument(uri: Uri, conversationId: Long) {
-        val processRequest = OneTimeWorkRequestBuilder<ProcessDocumentExpeditedWorker>()
-            .setInputData(
-                workDataOf(
-                    "uri" to uri.toString(),
-                    "conversationId" to conversationId
-                )
-            )
-            .setExpedited(OutOfQuotaPolicy.DROP_WORK_REQUEST)
-            .build()
+    // create the work request
+    override suspend fun processDocument(uri: Uri, conversationId: Long): Boolean {
 
-        workManager.enqueueUniqueWork(
-            uniqueWorkName = conversationId.toString(),
-            existingWorkPolicy = ExistingWorkPolicy.KEEP, // keep existing work and ignore new work
-            request = processRequest
-        )
-    }
-
-    override fun getDocumentProcessingFlow(conversationId: Long): Flow<WorkInfo?> {
-        return workManager
-            .getWorkInfosForUniqueWorkFlow(conversationId.toString())
-            .map { it.firstOrNull() }
-    }
-
-
-    // this function is the logic that the ProcessDocumentWorker needs to carry out !!
-    // (therefore, the ProcessDocumentWorker just calls this method)
-    override suspend fun processDocumentImpl(uri: Uri, conversationId: Long): Boolean {
-
-        // first, check if we are at max documents already (5)
         val documentCount = conversationLocalDataSource.getDocumentCount(conversationId)
         if (documentCount >= MAX_DOCUMENTS) {
             return false // unsuccessful process, since we are already at max documents !
@@ -84,39 +55,97 @@ class DocumentRepositoryImpl @Inject constructor(
 
         val documentName = getDocumentName(uri)
 
+        // get the hash to be used as the uniqueWorkName
         val extractedText = extractText(uri)
+        if (extractedText.isEmpty()) return false
+        val contentsHash = getDocumentHash(extractedText)
 
-        val hashContents = getDocumentHash(extractedText)
-        val documentIsProcessed = documentLocalDataSource.findDocumentHash(hashContents)
+        /**
+         * now we have: the document name, the extracted text and the hash of this text
+         * next, we want to check if the document is already in the database
+         * if it is, we know we don't need to create a worker !!
+         * otherwise, we need to create a worker ...
+         **/
 
-        // if the document has been processed, we still need to associate it to the conversation !!
-        if (documentIsProcessed) {
-            documentLocalDataSource.linkDocumentToConversation(conversationId, hashContents)
+        val documentInDb = documentLocalDataSource.findDocumentHash(contentsHash)
+
+        // if the document is in the database, we need to link it to this conversation
+        // also, need to get the processing status of it !!! -- should this now be implicit ??
+        if (documentInDb) {
+            documentLocalDataSource.linkDocumentToConversation(conversationId, contentsHash)
         }
-        // if the document hasn't been processed, then we need to add it to the document table,
-        // along with processing and adding all of its chunks to the documentChunk table !
+
+        // otherwise, create the worker
         else {
-            // first, insert the document to the document table, returning the document id
-            // this document id can be used for adding the chunks so we know the associated document
-            val documentId = documentLocalDataSource.insertNewDocument(
+            val documentId = insertDocumentToProcess(
                 documentName,
-                hashContents,
+                contentsHash,
                 conversationId
             )
 
-            val chunkedText = chunkText(extractedText)
-            for (chunk in chunkedText) {
-                val embedding = generateEmbedding(
-                    chunk,
-                    EmbedData.TaskType.RETRIEVAL_DOCUMENT,
-                    false
+            val tempFile = File(applicationContext.cacheDir, "$contentsHash.txt")
+            tempFile.writeText(extractedText)
+
+            val processRequest = OneTimeWorkRequestBuilder<ProcessDocumentExpeditedWorker>()
+                .setInputData(
+                    workDataOf(
+                        "tempFilePath" to tempFile.absolutePath,
+                        "documentId" to documentId
+                    )
                 )
-                documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
-            }
+                .addTag(conversationId.toString())
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST) // request is cancelled if no sufficient quota
+                .build()
+
+            workManager.enqueueUniqueWork(
+                uniqueWorkName = contentsHash,
+                existingWorkPolicy = ExistingWorkPolicy.KEEP, // keep existing work and ignore new work if duplicate
+                request = processRequest
+            )
+
         }
 
-        // successful process
         return true
+    }
+
+    override fun getDocumentProcessingFlow(conversationId: Long): Flow<List<ProcessingStatus>> {
+        return documentLocalDataSource.getProcessingFlow(conversationId)
+    }
+
+    private fun insertDocumentToProcess(
+        documentName: String,
+        contentsHash: String,
+        conversationId: Long
+    ): Long {
+        val documentId = documentLocalDataSource.insertNewDocument(
+            documentName,
+            contentsHash,
+            ProcessingStatus.PROCESSING,
+            conversationId
+        )
+        return documentId
+    }
+
+    override fun updateProcessingStatus(documentId: Long, processingStatus: ProcessingStatus) {
+        documentLocalDataSource.updateProcessingStatus(documentId, processingStatus)
+    }
+
+
+    // this function is the logic that the worker needs to carry out (i.e. processing the chunks which takes time) !!
+    // (therefore, the ProcessDocumentExpeditedWorker just calls this method)
+    override suspend fun processChunks(
+        documentId: Long,
+        documentContents: String
+    ) {
+        val chunkedText = chunkText(documentContents)
+        for (chunk in chunkedText) {
+            val embedding = generateEmbedding(
+                chunk,
+                EmbedData.TaskType.RETRIEVAL_DOCUMENT,
+                false
+            )
+            documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
+        }
     }
 
     private fun getDocumentName(uri: Uri): String {
@@ -165,7 +194,10 @@ class DocumentRepositoryImpl @Inject constructor(
     private fun getDocumentHash(text: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(text.toByteArray(StandardCharsets.UTF_8))
-        val hashString = android.util.Base64.encodeToString(hash, android.util.Base64.NO_WRAP)
+        val hashString = android.util.Base64.encodeToString(
+            hash,
+            android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP
+        )
         return hashString
     }
 }

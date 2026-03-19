@@ -183,7 +183,7 @@ class ConversationLocalDataSource @Inject constructor(
         }
 
         // delete related documents and document chunks if relevant
-        val documents = conversation.documents.toList()
+        val documents = getDocuments(conversationId)
         for (document in documents) {
             if (document.conversations.size == 1) {
                 val chunks = document.documentChunks.toList()
@@ -196,4 +196,11 @@ class ConversationLocalDataSource @Inject constructor(
 
         conversationBox.remove(conversationId)
     }
+
+    fun getDocuments(conversationId: Long): List<Document> {
+        val conversation = conversationBox.get(conversationId)
+        val documents = conversation.documents.toList()
+        return documents
+    }
+
 }
