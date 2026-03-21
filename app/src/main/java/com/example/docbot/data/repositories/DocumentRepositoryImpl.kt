@@ -94,7 +94,7 @@ class DocumentRepositoryImpl @Inject constructor(
                     )
                 )
                 .addTag(conversationId.toString())
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST) // request is cancelled if no sufficient quota
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
 
             workManager.enqueueUniqueWork(
@@ -184,6 +184,7 @@ class DocumentRepositoryImpl @Inject constructor(
         }
         finally {
             document.close()
+//            pdfInputStream?.close() // maybe need this ??
         }
     }
 

@@ -80,7 +80,10 @@ class ChatViewModel @AssistedInject constructor(
 
         messageRepository.createPrompt(conversationId, messageToSend)
 
-        _uiState.update { it.copy(currentUserMessage = "") }
+        _uiState.update { it.copy(
+            currentUserMessage = "",
+            modelProcessing = true
+        ) }
 
         // then, in the coroutine, generate the response
         viewModelScope.launch(Dispatchers.Default) {
@@ -89,7 +92,10 @@ class ChatViewModel @AssistedInject constructor(
                 .onCompletion {
                     val response = _uiState.value.currentResponseMessage
                     messageRepository.saveResponse(conversationId, response)
-                    _uiState.update { it.copy(currentResponseMessage = "") }
+                    _uiState.update { it.copy(
+                        currentResponseMessage = "",
+                        modelProcessing = false
+                    ) }
                 }
                 .collect { value ->
                     _uiState.update {
@@ -139,6 +145,14 @@ class ChatViewModel @AssistedInject constructor(
                 .collect { documentNames ->
                     _uiState.update { it.copy(documentNames = documentNames) }
                 }
+        }
+    }
+
+    fun displayBackMessage() {
+        viewModelScope.launch {
+            _uiState.value.snackbarHostState.showSnackbar(
+                "Please wait until the model has finished generating its response before navigating back."
+            )
         }
     }
 }

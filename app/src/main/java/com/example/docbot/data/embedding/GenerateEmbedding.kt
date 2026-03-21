@@ -12,7 +12,7 @@ suspend fun generateEmbedding(
     isQuery: Boolean
 ): ImmutableList<Float> {
     val embeddingModel = GemmaEmbeddingModel(
-        "/data/local/tmp/slm/embeddinggemma-300M_seq2048_mixed-precision.tflite",
+        "/data/local/tmp/slm/embeddinggemma-300M_seq1024_mixed-precision.tflite",
         "/data/local/tmp/slm/sentencepiece.model",
         false
     )

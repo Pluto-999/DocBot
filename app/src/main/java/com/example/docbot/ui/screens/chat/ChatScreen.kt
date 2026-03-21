@@ -2,6 +2,7 @@ package com.example.docbot.ui.screens.chat
 
 import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.docbot.ui.screens.chat.components.DocumentLoading
+import com.example.docbot.ui.screens.chat.components.LoadingIndicator
 import com.example.docbot.ui.screens.chat.components.DocumentPicker
 import com.example.docbot.ui.screens.chat.components.MessageList
 import com.example.docbot.ui.screens.chat.components.MessageTextBox
@@ -58,6 +59,11 @@ fun ChatScreen(
         pdfLauncher.launch(intent)
     }
 
+    // cannot go back when the model is loading/processing/generating a response
+    BackHandler(uiState.modelProcessing) {
+        viewModel.displayBackMessage()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,7 +82,7 @@ fun ChatScreen(
                     }
                     IconButton(
                         onClick = {
-                            if (!uiState.documentProcessing) {
+                            if (!uiState.documentProcessing && !uiState.modelProcessing) {
                                 viewModel.toggleDocumentPickerDialog(true)
                             }
                         }
@@ -109,7 +115,7 @@ fun ChatScreen(
                 value = uiState.currentUserMessage,
                 onValueChange = { viewModel.updateCurrentMessage(newMessage = it) },
                 createMessage = { viewModel.sendMessage() },
-                enabled = !uiState.documentProcessing
+                enabled = !uiState.documentProcessing && !uiState.modelProcessing
             )
         }
 
@@ -134,7 +140,11 @@ fun ChatScreen(
         }
 
         if (uiState.documentProcessing) {
-            DocumentLoading()
+            LoadingIndicator(message = "Processing document")
+        }
+
+        if (uiState.modelProcessing) {
+            LoadingIndicator(message = "Model response generating")
         }
     }
 }

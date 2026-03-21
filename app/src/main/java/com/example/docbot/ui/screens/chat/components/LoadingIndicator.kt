@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DocumentLoading() {
+fun LoadingIndicator(
+    message: String
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -29,7 +31,7 @@ fun DocumentLoading() {
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Processing Document")
+            Text(text = message)
         }
     }
 }
