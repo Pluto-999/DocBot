@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface ConversationRepository {
     fun createConversation(): Long
-    fun deleteConversation(conversationId: Long)
+    fun deleteConversationManually(conversationId: Long)
+    fun deleteOldConversations()
     fun getConversations(
         order: ConversationOrder,
         filter: ConversationFilter,

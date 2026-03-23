@@ -29,7 +29,19 @@ class ConversationRepositoryImpl @Inject constructor(
         return conversationId
     }
 
-    override fun deleteConversation(conversationId: Long) {
+    override fun deleteConversationManually(conversationId: Long) {
+        deleteConversation(conversationId)
+    }
+
+    override fun deleteOldConversations() {
+        val oldConversationIds = conversationLocalDataSource.getOldConversationsId()
+
+        for (id in oldConversationIds) {
+            deleteConversation(id)
+        }
+    }
+
+    private fun deleteConversation(conversationId: Long) {
         // need to cancel the work that is processing the document associated to this conversation
 
         // get the documents associated with this conversation
@@ -44,8 +56,7 @@ class ConversationRepositoryImpl @Inject constructor(
                 workManager.cancelUniqueWork(document.contentHash)
             }
         }
-
-        conversationLocalDataSource.manuallyDeleteConversation(conversationId)
+        conversationLocalDataSource.deleteConversation(conversationId)
     }
 
     override fun getConversations(

@@ -34,7 +34,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun deleteConversation(conversationId: Long) {
-        conversationRepository.deleteConversation(conversationId)
+        conversationRepository.deleteConversationManually(conversationId)
     }
 
     private var conversationJob: Job? = null

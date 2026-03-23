@@ -150,11 +150,7 @@ class ConversationLocalDataSource @Inject constructor(
 
     /*** Deleting Conversations ***/
 
-    fun manuallyDeleteConversation(conversationId: Long) {
-        deleteConversation(conversationId)
-    }
-
-    fun deleteTenDayOldConversations() {
+    fun getOldConversationsId(): List<Long> {
         val tenDaysAgo = LocalDateTime.now().minusDays(10)
         // from: https://stackoverflow.com/questions/19431234/converting-between-java-time-localdatetime-and-java-util-date
         val tenDaysAgoDateFormat = Date.from(tenDaysAgo.atZone(ZoneId.systemDefault()).toInstant())
@@ -167,34 +163,32 @@ class ConversationLocalDataSource @Inject constructor(
             .build()
             .find()
 
-        for (conversation in oldConversationsList) {
-            deleteConversation(conversation.id)
-        }
+        return oldConversationsList.map { it.id }
     }
 
-    private fun deleteConversation(conversationId: Long) {
+    fun deleteConversation(conversationId: Long) {
+        conversationBox.store.callInTx {
+            val conversation = conversationBox.get(conversationId)
 
-        val conversation = conversationBox.get(conversationId)
+            // delete related messages
+            val messages = conversation.messages.toList()
+            messageBox.remove(messages)
 
-        // delete related messages
-        val messages = conversation.messages.toList()
-        for (message in messages) {
-            messageBox.remove(message.id)
-        }
+            // delete related documents and document chunks if relevant
+            val documents = getDocuments(conversationId)
+            for (document in documents) {
+                if (document.conversations.size == 1) {
+                    // delete all chunks
+                    val chunks = document.documentChunks.toList()
+                    documentChunkBox.remove(chunks)
 
-        // delete related documents and document chunks if relevant
-        val documents = getDocuments(conversationId)
-        for (document in documents) {
-            if (document.conversations.size == 1) {
-                val chunks = document.documentChunks.toList()
-                for (chunk in chunks) {
-                    documentChunkBox.remove(chunk.id)
+                    // delete the document
+                    documentBox.remove(document.id)
                 }
-                documentBox.remove(document.id)
             }
+            // finally, delete the conversation
+            conversationBox.remove(conversationId)
         }
-
-        conversationBox.remove(conversationId)
     }
 
     fun getDocuments(conversationId: Long): List<Document> {
