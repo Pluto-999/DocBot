@@ -41,9 +41,33 @@ class DocumentRepositoryImpl @Inject constructor(
     private val contentResolver = applicationContext.contentResolver
     private val workManager = WorkManager.getInstance(applicationContext)
 
+
     override fun getDocumentTitles(conversationId: Long): Flow<List<String>> {
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)
     }
+
+    override fun getDocumentProcessingFlow(conversationId: Long): Flow<List<ProcessingStatus>> {
+        return documentLocalDataSource.getProcessingFlow(conversationId)
+    }
+
+    private fun insertDocumentToProcess(
+        documentName: String,
+        contentsHash: String,
+        conversationId: Long
+    ): Long {
+        val documentId = documentLocalDataSource.insertNewDocument(
+            documentName,
+            contentsHash,
+            ProcessingStatus.PROCESSING,
+            conversationId
+        )
+        return documentId
+    }
+
+    override fun updateProcessingStatus(documentId: Long, processingStatus: ProcessingStatus) {
+        documentLocalDataSource.updateProcessingStatus(documentId, processingStatus)
+    }
+
 
     // create the work request
     override suspend fun processDocument(uri: Uri, conversationId: Long): Boolean {
@@ -59,6 +83,9 @@ class DocumentRepositoryImpl @Inject constructor(
         val extractedText = extractText(uri)
         if (extractedText.isEmpty()) return false
         val contentsHash = getDocumentHash(extractedText)
+
+        Log.e("Extracted Text Output", extractedText.replace("\n", "\\n"))
+//        Log.e("TEXT !!!", extractedText)
 
         /**
          * now we have: the document name, the extracted text and the hash of this text
@@ -108,28 +135,6 @@ class DocumentRepositoryImpl @Inject constructor(
         return true
     }
 
-    override fun getDocumentProcessingFlow(conversationId: Long): Flow<List<ProcessingStatus>> {
-        return documentLocalDataSource.getProcessingFlow(conversationId)
-    }
-
-    private fun insertDocumentToProcess(
-        documentName: String,
-        contentsHash: String,
-        conversationId: Long
-    ): Long {
-        val documentId = documentLocalDataSource.insertNewDocument(
-            documentName,
-            contentsHash,
-            ProcessingStatus.PROCESSING,
-            conversationId
-        )
-        return documentId
-    }
-
-    override fun updateProcessingStatus(documentId: Long, processingStatus: ProcessingStatus) {
-        documentLocalDataSource.updateProcessingStatus(documentId, processingStatus)
-    }
-
 
     // this function is the logic that the worker needs to carry out (i.e. processing the chunks which takes time) !!
     // (therefore, the ProcessDocumentExpeditedWorker just calls this method)
@@ -176,7 +181,8 @@ class DocumentRepositoryImpl @Inject constructor(
             pdfStripper.startPage = 0
             pdfStripper.endPage = document.numberOfPages
             val parsedText = pdfStripper.getText(document)
-            return parsedText
+            val formattedText = formatText(parsedText)
+            return formattedText
         }
         catch (e: IOException) {
             Log.e("extractText", "Failed trying to strip text: $e")
@@ -184,8 +190,18 @@ class DocumentRepositoryImpl @Inject constructor(
         }
         finally {
             document.close()
-//            pdfInputStream?.close() // maybe need this ??
+            pdfInputStream?.close() // maybe need this ??
         }
+    }
+
+    private fun formatText(text: String): String {
+        val newlineSpacesRegex = Regex("( *\n){2,}")
+        val sameSentenceRegex = Regex("""(\w) *\n *(\w)""")
+        val collapseNewlinesRegex = Regex("\n{3,}")
+        return text
+            .replace(newlineSpacesRegex, "\n\n")
+            .replace(sameSentenceRegex, "$1 $2")
+            .replace(collapseNewlinesRegex, "\n\n")
     }
 
     private fun chunkText(text: String): List<String> {
