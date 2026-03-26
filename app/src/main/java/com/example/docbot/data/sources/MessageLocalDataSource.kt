@@ -11,6 +11,8 @@ import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+const val PREVIOUS_MESSAGES_LIMIT: Long = 3
+
 class MessageLocalDataSource @Inject constructor(
     private val messageBox: Box<Message>,
     private val conversationBox: Box<Conversation>
@@ -58,8 +60,8 @@ class MessageLocalDataSource @Inject constructor(
 
         responseBuilder.order(Message_.timestamp, QueryBuilder.DESCENDING)
 
-        val prompts = promptBuilder.build().find(1, 5).reversed()
-        val responses = responseBuilder.build().find(0, 5).reversed()
+        val prompts = promptBuilder.build().find(1, PREVIOUS_MESSAGES_LIMIT).reversed()
+        val responses = responseBuilder.build().find(0, PREVIOUS_MESSAGES_LIMIT).reversed()
 
         return prompts.zip(responses) { a, b -> listOf(a, b) }.flatten()
     }

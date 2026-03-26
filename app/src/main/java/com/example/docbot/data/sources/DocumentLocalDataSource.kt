@@ -16,13 +16,13 @@ class DocumentLocalDataSource @Inject constructor(
     private val conversationBox: Box<Conversation>
 ) {
 
-    fun getDocuments(conversationId: Long): List<Document> {
+    fun getDocumentIds(conversationId: Long): List<Long> {
         val builder = documentBox.query()
 
         builder.link(Document_.conversations)
             .apply(Conversation_.id.equal(conversationId))
 
-        return builder.build().find()
+        return builder.build().find().map { it.id }
     }
 
     fun findDocumentHash(hash: String): Boolean {

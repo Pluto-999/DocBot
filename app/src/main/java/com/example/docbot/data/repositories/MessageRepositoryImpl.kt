@@ -77,15 +77,17 @@ class MessageRepositoryImpl @Inject constructor(
             true
         )
 
-        val documents = documentLocalDataSource.getDocuments(conversationId)
-        val documentIds = documents.map { it.id }
-        val promptContext = documentChunkLocalDataSource.getRelevantChunk(documentIds, promptEmbedding)
+        val documentIds = documentLocalDataSource.getDocumentIds(conversationId)
+        val promptContext = documentChunkLocalDataSource.getRelevantChunks(documentIds, promptEmbedding)
 
         val contextString =
             if (promptContext.isEmpty()) {
                 ""
             } else {
-                "Use the following context when answering this prompt, alongside your own knowledge if required: $promptContext"
+                """
+                    Use the following context, if relevant, when answering this prompt, alongside your own knowledge if required:
+                    ${promptContext.map { it }}
+                """.trimIndent()
             }
 
         val previousMessages = messageLocalDataSource.getRecentMessages(conversationId)

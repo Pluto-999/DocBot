@@ -8,22 +8,26 @@ import io.objectbox.Box
 import io.objectbox.kotlin.and
 import javax.inject.Inject
 
+const val RETURNED_CHUNKS = 3
+
 class DocumentChunkLocalDataSource @Inject constructor(
     private val documentBox: Box<Document>,
     private val documentChunkBox: Box<DocumentChunk>
 ) {
-    fun getRelevantChunk(
+    fun getRelevantChunks(
         documentIds: List<Long>,
         promptEmbedding: ImmutableList<Float>
-    ): String {
-        val builder = documentChunkBox.query(
+    ): List<String> {
+        val query = documentChunkBox.query(
             DocumentChunk_.embedding.nearestNeighbors(
                 promptEmbedding.toFloatArray(),
-                10) and
+                20) and
                     DocumentChunk_.documentId.oneOf(documentIds.toLongArray())
-        )
+        ).build()
 
-        return builder.build().findFirst()?.chunk ?: ""
+        val results = query.findWithScores()
+
+        return results.take(RETURNED_CHUNKS).map { it.get().chunk }
     }
 
     fun insertDocumentChunk(
