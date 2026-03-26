@@ -30,6 +30,9 @@ import java.security.MessageDigest
 import javax.inject.Inject
 
 const val MAX_DOCUMENTS = 5
+const val CHUNK_SIZE = 512
+const val CHARS_PER_TOKEN = 4
+val SEPARATORS = listOf("\n\n", "\n", " ", "")
 
 class DocumentRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
@@ -84,16 +87,6 @@ class DocumentRepositoryImpl @Inject constructor(
         if (extractedText.isEmpty()) return false
         val contentsHash = getDocumentHash(extractedText)
 
-        Log.e("Extracted Text Output", extractedText.replace("\n", "\\n"))
-//        Log.e("TEXT !!!", extractedText)
-
-        /**
-         * now we have: the document name, the extracted text and the hash of this text
-         * next, we want to check if the document is already in the database
-         * if it is, we know we don't need to create a worker !!
-         * otherwise, we need to create a worker ...
-         **/
-
         val documentInDb = documentLocalDataSource.findDocumentHash(contentsHash)
 
         // if the document is in the database, we need to link it to this conversation
@@ -142,8 +135,9 @@ class DocumentRepositoryImpl @Inject constructor(
         documentId: Long,
         documentContents: String
     ) {
-        val chunkedText = chunkText(documentContents)
-        for (chunk in chunkedText) {
+        val chunkedText = chunkText(documentContents, 0)
+        val overlappedChunks = addOverlap(chunkedText)
+        for (chunk in overlappedChunks) {
             val embedding = generateEmbedding(
                 chunk,
                 EmbedData.TaskType.RETRIEVAL_DOCUMENT,
@@ -204,8 +198,78 @@ class DocumentRepositoryImpl @Inject constructor(
             .replace(collapseNewlinesRegex, "\n\n")
     }
 
-    private fun chunkText(text: String): List<String> {
-        return TextChunker().chunk(text, 512, 30)
+    private fun chunkText(text: String, splitIndex: Int): List<String> {
+        // base cases -- exhausted all separators, or text is less than chunk size
+        if (splitIndex >= SEPARATORS.size || estimateChunkSize(text) <= CHUNK_SIZE) {
+            return listOf(text)
+        }
+
+        val finalChunks = mutableListOf<String>()
+
+        val splitText = text.split(SEPARATORS[splitIndex]).filter { it.isNotBlank() }
+
+        var combinedChunks = ""
+
+        for (chunk in splitText) {
+            val chunkSize = estimateChunkSize(chunk)
+            val combinedChunksSize = estimateChunkSize(combinedChunks)
+
+            // if the chunk is bigger (WITHOUT combinedChunks), of course we need split again !!
+            if (chunkSize > CHUNK_SIZE) {
+                if (combinedChunks.isNotEmpty()) {
+                    finalChunks.add(combinedChunks)
+                    combinedChunks = ""
+                }
+                val smallerChunks = chunkText(chunk, splitIndex + 1)
+                finalChunks.addAll(smallerChunks)
+                continue
+            }
+
+            // this is the case where we can add the current chunk
+            if (chunkSize + combinedChunksSize <= CHUNK_SIZE) {
+                combinedChunks += if (combinedChunks.isEmpty()) chunk else SEPARATORS[splitIndex] + chunk
+            }
+            // otherwise, if we add the current chunk, it will go over the chunk size !!
+            // therefore, we MUST add combinedChunks to the final chunks
+            // then we "reset" combinedChunks
+            else {
+                finalChunks.add(combinedChunks)
+                combinedChunks = chunk
+            }
+        }
+
+        if (combinedChunks.isNotEmpty()) finalChunks.add(combinedChunks)
+
+        return finalChunks
+    }
+
+    private fun addOverlap(chunks: List<String>): List<String> {
+        val overlappedChunks = mutableListOf<String>()
+
+        for ((i, chunk) in chunks.withIndex()) {
+            val chunkSize = estimateChunkSize(chunk)
+
+            if (chunkSize >= CHUNK_SIZE * 0.2) {
+                val prevChunk = if (i > 0) chunks[i - 1] else ""
+                val prevChunkSize = estimateChunkSize(prevChunk)
+
+                val overlapSize = (prevChunkSize * 0.1 * CHARS_PER_TOKEN).toInt()
+
+                val overlap = prevChunk.takeLast(overlapSize)
+
+                val newChunk = overlap + chunk
+                overlappedChunks.add(newChunk)
+            }
+            else {
+                overlappedChunks.add(chunk)
+            }
+        }
+
+        return overlappedChunks
+    }
+
+    private fun estimateChunkSize(text: String): Int {
+        return text.length / CHARS_PER_TOKEN
     }
 
     private fun getDocumentHash(text: String): String {
