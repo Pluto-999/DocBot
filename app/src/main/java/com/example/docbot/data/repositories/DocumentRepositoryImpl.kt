@@ -16,7 +16,6 @@ import com.example.docbot.data.sources.ConversationLocalDataSource
 import com.example.docbot.data.sources.DocumentChunkLocalDataSource
 import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.workers.ProcessDocumentExpeditedWorker
-import com.google.ai.edge.localagents.rag.chunking.TextChunker
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
@@ -38,12 +37,11 @@ class DocumentRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
     private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
+    private val workManager: WorkManager,
     @ApplicationContext private val applicationContext: Context
 ) : DocumentRepository {
 
     private val contentResolver = applicationContext.contentResolver
-    private val workManager = WorkManager.getInstance(applicationContext)
-
 
     override fun getDocumentTitles(conversationId: Long): Flow<List<String>> {
         return conversationLocalDataSource.getDocumentTitlesFromId(conversationId)

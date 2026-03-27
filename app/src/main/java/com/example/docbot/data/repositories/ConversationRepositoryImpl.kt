@@ -1,6 +1,5 @@
 package com.example.docbot.data.repositories
 
-import android.content.Context
 import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -11,7 +10,6 @@ import com.example.docbot.data.sources.DocumentLocalDataSource
 import com.example.docbot.ui.screens.home.ConversationFilter
 import com.example.docbot.ui.screens.home.ConversationOrder
 import com.example.docbot.workers.ConversationDeletionWorker
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -19,10 +17,8 @@ import javax.inject.Inject
 class ConversationRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
-    @ApplicationContext private val applicationContext: Context
+    private val workManager: WorkManager
 ): ConversationRepository {
-
-    private val workManager = WorkManager.getInstance(applicationContext)
 
     override fun createConversation(): Long {
         val conversationId = conversationLocalDataSource.insertConversation()
@@ -100,19 +96,17 @@ class ConversationRepositoryImpl @Inject constructor(
             1, TimeUnit.HOURS
         ).build()
 
-        WorkManager
-            .getInstance(applicationContext)
-            .enqueueUniquePeriodicWork(
-                uniqueWorkName = "deleteOldConversations",
-                existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
-                request = deleteRequest
-            )
+        workManager.enqueueUniquePeriodicWork(
+            uniqueWorkName = "deleteOldConversations",
+            existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
+            request = deleteRequest
+        )
 
         // One time request for testing only !!!
 
 //        val request = OneTimeWorkRequestBuilder<ConversationDeletionWorker>()
 //            .build()
 //
-//        WorkManager.getInstance(applicationContext).enqueue(request)
+//        workManager.enqueue(request)
     }
 }

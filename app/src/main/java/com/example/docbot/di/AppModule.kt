@@ -1,6 +1,7 @@
 package com.example.docbot.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.example.docbot.data.ObjectBox
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Document
@@ -61,12 +62,12 @@ object AppModule {
     fun provideConversationRepository(
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
-        @ApplicationContext applicationContext: Context
+        workManager: WorkManager
     ): ConversationRepository {
         return ConversationRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
-            applicationContext
+            workManager
         )
     }
 
@@ -92,12 +93,14 @@ object AppModule {
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
+        workManager: WorkManager,
         @ApplicationContext applicationContext: Context
     ): DocumentRepository {
         return DocumentRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
+            workManager,
             applicationContext
         )
     }
@@ -111,5 +114,13 @@ object AppModule {
                 backend = Backend.CPU
             )
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(
+        @ApplicationContext applicationContext: Context
+    ): WorkManager {
+        return WorkManager.getInstance(applicationContext)
     }
 }
