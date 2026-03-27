@@ -26,6 +26,8 @@ pdfBox = "2.0.27.0"
 guava = "33.5.0-android"
 kotlinGuava = "1.10.2"
 protoBuf = "4.34.0"
+mockk = "1.14.9"
+coroutine-test = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +63,8 @@ androidx-pdfbox = { group = "com.tom-roush", name = "pdfbox-android", version.re
 androidx-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 kotlinx-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinGuava" }
 androidx-protobuf = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protoBuf" }
+kotlinx-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine-test" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

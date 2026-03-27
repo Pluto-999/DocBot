@@ -49,7 +49,7 @@ class DocumentLocalDataSource @Inject constructor(
 
             // the conversation "owns" the relationship between the conversation and document
             // therefore, we also need to access this
-            val conversationToUpdate = conversationBox.get(conversationId)
+            val conversationToUpdate = conversationBox.get(conversationId) ?: return@callInTx -1
             conversationToUpdate.documents.add(documentToInsert)
             conversationBox.put(conversationToUpdate)
 
@@ -58,7 +58,7 @@ class DocumentLocalDataSource @Inject constructor(
     }
 
     fun updateProcessingStatus(documentId: Long, processingStatus: ProcessingStatus) {
-        val document = documentBox.get(documentId)
+        val document = documentBox.get(documentId) ?: return
         document.processingStatus = processingStatus
         documentBox.put(document)
     }
@@ -86,18 +86,17 @@ class DocumentLocalDataSource @Inject constructor(
     }
 
     fun linkDocumentToConversation(conversationId: Long, hash: String) {
-        val document = getDocumentFromHash(hash)
-        val conversationToUpdate = conversationBox.get(conversationId)
+        val document = getDocumentFromHash(hash) ?: return
+        val conversationToUpdate = conversationBox.get(conversationId) ?: return
 
-        if (document != null) {
-            conversationToUpdate.documents.add(document)
-            conversationBox.put(conversationToUpdate)
+        conversationToUpdate.documents.add(document)
+        conversationBox.put(conversationToUpdate)
 
-            // reassign forces objectbox to observe the change and trigger subscribers for UI
-            if (document.processingStatus == ProcessingStatus.PROCESSING) {
-                document.processingStatus = ProcessingStatus.PROCESSING
-                documentBox.put(document)
-            }
+        // reassign forces objectbox to observe the change and trigger subscribers for UI
+        if (document.processingStatus == ProcessingStatus.PROCESSING) {
+            document.processingStatus = ProcessingStatus.PROCESSING
+            documentBox.put(document)
         }
+
     }
 }

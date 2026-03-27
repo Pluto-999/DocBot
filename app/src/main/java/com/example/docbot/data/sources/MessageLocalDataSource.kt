@@ -26,7 +26,7 @@ class MessageLocalDataSource @Inject constructor(
         val newMessage = Message(contents = messageContents, messageType = messageType)
         val dateTime = newMessage.timestamp
 
-        val conversation = conversationBox.get(conversationId)
+        val conversation = conversationBox.get(conversationId) ?: return
 
         conversation.latestMessage = dateTime
 

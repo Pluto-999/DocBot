@@ -39,7 +39,7 @@ class DocumentChunkLocalDataSource @Inject constructor(
             chunk = textChunk,
             embedding = embedding.toFloatArray()
         )
-        val document = documentBox.get(documentId)
+        val document = documentBox.get(documentId) ?: return
         documentChunkToInsert.document.setTarget(document)
         documentChunkBox.put(documentChunkToInsert)
     }

@@ -114,7 +114,7 @@ class ConversationLocalDataSource @Inject constructor(
     }
 
     fun getDocumentCount(conversationId: Long): Int {
-        val conversation = conversationBox.get(conversationId)
+        val conversation = conversationBox.get(conversationId) ?: return -1
         return conversation.documents.size
     }
 
@@ -122,7 +122,7 @@ class ConversationLocalDataSource @Inject constructor(
     /*** Updating Conversations ***/
 
     fun updateConversationTitle(conversationId: Long, title: String) {
-        val conversation: Conversation = conversationBox.get(conversationId)
+        val conversation = conversationBox.get(conversationId) ?: return
         conversation.title = title
         conversationBox.put(conversation)
     }
@@ -135,14 +135,14 @@ class ConversationLocalDataSource @Inject constructor(
         if (favouriteCount >= 10) {
             throw IllegalStateException("Maximum of 10 favourites reached")
         } else {
-            val conversation: Conversation = conversationBox.get(conversationId)
+            val conversation = conversationBox.get(conversationId) ?: return
             conversation.favourite = true
             conversationBox.put(conversation)
         }
     }
 
     fun removeConversationFromFavourites(conversationId: Long) {
-        val conversation: Conversation = conversationBox.get(conversationId)
+        val conversation = conversationBox.get(conversationId) ?: return
         conversation.favourite = false
         conversationBox.put(conversation)
     }
@@ -168,7 +168,7 @@ class ConversationLocalDataSource @Inject constructor(
 
     fun deleteConversation(conversationId: Long) {
         conversationBox.store.callInTx {
-            val conversation = conversationBox.get(conversationId)
+            val conversation = conversationBox.get(conversationId) ?: return@callInTx
 
             // delete related messages
             val messages = conversation.messages.toList()
@@ -192,7 +192,7 @@ class ConversationLocalDataSource @Inject constructor(
     }
 
     fun getDocuments(conversationId: Long): List<Document> {
-        val conversation = conversationBox.get(conversationId)
+        val conversation = conversationBox.get(conversationId) ?: return emptyList()
         val documents = conversation.documents.toList()
         return documents
     }
