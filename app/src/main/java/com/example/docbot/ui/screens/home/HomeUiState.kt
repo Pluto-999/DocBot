@@ -13,7 +13,7 @@ data class HomeUiState (
     val conversationFilter: ConversationFilter = ConversationFilter.NONE,
     val searchQuery: String = "",
 
-    val snackbarHostState: SnackbarHostState = SnackbarHostState()
+    val errorMessage: String? = null
 )
 
 data class ConversationState(

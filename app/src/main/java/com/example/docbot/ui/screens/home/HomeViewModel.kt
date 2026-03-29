@@ -107,12 +107,14 @@ class HomeViewModel @Inject constructor(
         val successfulToggle = conversationRepository.toggleFavourite(conversationId, isFavourite)
 
         if (!successfulToggle) {
-            viewModelScope.launch {
-                _uiState.value.snackbarHostState.showSnackbar(
-                    "You can only have up to 10 favourite conversations"
-                )
-            }
+            _uiState.update { it.copy(
+                errorMessage = "You can only have up to 10 favourite conversations"
+            ) }
         }
+    }
+
+    fun clearErrorMessage() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     fun toggleFilterMenu(newState: Boolean) {
