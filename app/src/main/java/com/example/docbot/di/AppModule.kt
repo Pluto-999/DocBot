@@ -27,6 +27,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 @Module
@@ -123,4 +125,8 @@ object AppModule {
     ): WorkManager {
         return WorkManager.getInstance(applicationContext)
     }
+
+    @Provides
+    @Singleton
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }

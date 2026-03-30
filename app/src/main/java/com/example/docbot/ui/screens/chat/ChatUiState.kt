@@ -13,7 +13,7 @@ data class ChatUiState(
     val documentNames: List<String> = listOf(),
     val documentProcessing: Boolean = false,
     val modelProcessing: Boolean = false,
-    val snackbarHostState: SnackbarHostState = SnackbarHostState()
+    val errorMessage: String? = null
 )
 
 data class MessageState(

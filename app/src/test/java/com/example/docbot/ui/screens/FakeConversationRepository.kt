@@ -1,7 +1,9 @@
-package com.example.docbot.ui.screens.home
+package com.example.docbot.ui.screens
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.repositories.ConversationRepository
+import com.example.docbot.ui.screens.home.ConversationFilter
+import com.example.docbot.ui.screens.home.ConversationOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDateTime
@@ -11,6 +13,7 @@ class FakeConversationRepository: ConversationRepository {
     private val conversations = mutableListOf<Conversation>()
     private val conversationsFlow = MutableStateFlow<List<Conversation>>(emptyList())
     var favouriteToggleSuccess = true
+    var returnNullTitle = false
 
     override fun createConversation(): Long {
         val conversationId = (conversations.size + 1).toLong()
@@ -43,8 +46,8 @@ class FakeConversationRepository: ConversationRepository {
     }
 
     override fun getConversationTitle(conversationId: Long): String? {
-        val conversation = conversations.find { it.id == conversationId }
-        return conversation?.title
+        if (returnNullTitle) return null
+        return conversations.find { it.id == conversationId }?.title
     }
 
     override fun updateTitle(conversationId: Long, title: String) {

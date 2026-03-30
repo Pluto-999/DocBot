@@ -1,5 +1,8 @@
 package com.example.docbot.ui.screens.home
 
+import com.example.docbot.ui.screens.FakeConversationRepository
+import com.example.docbot.ui.screens.MainDispatcherRule
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -29,6 +32,8 @@ class HomeViewModelTest {
         fakeRepository.createConversation()
         fakeRepository.createConversation()
 
+        advanceUntilIdle()
+
         assertEquals(2, viewModel.uiState.value.conversations.size)
     }
 
@@ -36,16 +41,18 @@ class HomeViewModelTest {
     /****/
 
     @Test
-    fun testOldConversationIsMarkedWithDeleteSoon() {
+    fun testOldConversationIsMarkedWithDeleteSoon() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusDays(9))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertTrue(conversation.deleteSoon)
     }
 
     @Test
-    fun testNotOldConversationIsNotMarkedWithDeleteSoon() {
+    fun testNotOldConversationIsNotMarkedWithDeleteSoon() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusDays(5))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertFalse(conversation.deleteSoon)
@@ -54,40 +61,45 @@ class HomeViewModelTest {
     /****/
 
     @Test
-    fun testFormatDateAsJustNow() {
+    fun testFormatDateAsJustNow() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now())
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertEquals("Just now", conversation.date)
     }
 
     @Test
-    fun testFormatDateAsMinutesAgo() {
+    fun testFormatDateAsMinutesAgo() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusMinutes(10))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertEquals("10 minutes ago", conversation.date)
     }
 
     @Test
-    fun testFormatDateAsHoursAgo() {
+    fun testFormatDateAsHoursAgo() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusHours(10))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertEquals("10 hours ago", conversation.date)
     }
 
     @Test
-    fun testFormatDateAsOneDayAgo() {
+    fun testFormatDateAsOneDayAgo() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusDays(1))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertEquals("1 day ago", conversation.date)
     }
 
     @Test
-    fun testFormatDateAsDaysAgo() {
+    fun testFormatDateAsDaysAgo() = runTest {
         fakeRepository.createConversationWithLatestMessage(LocalDateTime.now().minusDays(5))
+        advanceUntilIdle()
 
         val conversation = viewModel.uiState.value.conversations.first()
         assertEquals("5 days ago", conversation.date)
@@ -101,9 +113,11 @@ class HomeViewModelTest {
         assertEquals(0, viewModel.uiState.value.conversations.size)
 
         viewModel.createConversation()
+        advanceUntilIdle()
         assertEquals(1, viewModel.uiState.value.conversations.size)
 
         viewModel.createConversation()
+        advanceUntilIdle()
         assertEquals(2, viewModel.uiState.value.conversations.size)
     }
 
@@ -115,12 +129,16 @@ class HomeViewModelTest {
         val conversationOneId = fakeRepository.createConversation()
         val conversationTwoId = fakeRepository.createConversation()
 
+        advanceUntilIdle()
+
         assertEquals(2, viewModel.uiState.value.conversations.size)
 
         viewModel.deleteConversation(conversationOneId)
+        advanceUntilIdle()
         assertEquals(1, viewModel.uiState.value.conversations.size)
 
         viewModel.deleteConversation(conversationTwoId)
+        advanceUntilIdle()
         assertEquals(0, viewModel.uiState.value.conversations.size)
     }
 

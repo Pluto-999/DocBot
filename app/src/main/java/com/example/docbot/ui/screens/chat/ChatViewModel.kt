@@ -11,6 +11,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +30,8 @@ class ChatViewModel @AssistedInject constructor(
     private val conversationRepository: ConversationRepository,
     private val messageRepository: MessageRepository,
     private val documentRepository: DocumentRepository,
-    @Assisted private val conversationId: Long
+    @Assisted private val conversationId: Long,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ): ViewModel() {
 
     // using StateFlow means the UI constantly has access to the up-to-date state
@@ -45,7 +47,6 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     private fun getMessages() {
-        // we must use viewModel coroutine otherwise we can't use .collect !
         viewModelScope.launch {
             messageRepository.getMessages(conversationId).collect { messages ->
                 val uiMessages: List<MessageState> = messages.map {
@@ -86,7 +87,7 @@ class ChatViewModel @AssistedInject constructor(
         ) }
 
         // then, in the coroutine, generate the response
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(defaultDispatcher) {
             messageRepository
                 .generateResponse(conversationId, messageToSend)
                 .onCompletion {
@@ -116,12 +117,12 @@ class ChatViewModel @AssistedInject constructor(
     fun processDocument(uri: Uri?) {
         if (uri != null) {
             _uiState.update { it.copy(openDocumentPickerSheet = false) }
-            viewModelScope.launch(Dispatchers.Default) {
+            viewModelScope.launch(defaultDispatcher) {
                 val successfulInitialProcess = documentRepository.processDocument(uri, conversationId)
                 if (!successfulInitialProcess) {
-                    _uiState.value.snackbarHostState.showSnackbar(
-                        "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
-                    )
+                    _uiState.update { it.copy(
+                        errorMessage = "Something went wrong. Please ensure you have selected no more than 5 documents, and try again."
+                    ) }
                 }
             }
         }
@@ -149,10 +150,12 @@ class ChatViewModel @AssistedInject constructor(
     }
 
     fun displayBackMessage() {
-        viewModelScope.launch {
-            _uiState.value.snackbarHostState.showSnackbar(
-                "Please wait until the model has finished generating its response before navigating back."
-            )
-        }
+        _uiState.update { it.copy(
+            errorMessage = "Please wait until the model has finished generating its response before navigating back."
+        ) }
+    }
+
+    fun clearErrorMessage() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }
