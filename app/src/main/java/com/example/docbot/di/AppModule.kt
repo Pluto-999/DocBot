@@ -18,6 +18,7 @@ import com.example.docbot.data.conversation.ConversationWorkScheduler
 import com.example.docbot.data.document.DocumentChunkLocalDataSource
 import com.example.docbot.data.document.DocumentLocalDataSource
 import com.example.docbot.data.document.processing.DocumentProcessingScheduler
+import com.example.docbot.data.document.processing.DocumentProcessor
 import com.example.docbot.data.document.processing.PdfTextExtractor
 import com.example.docbot.data.document.processing.TextChunker
 import com.example.docbot.data.document.processing.TextExtractor
@@ -108,18 +109,14 @@ object AppModule {
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
-        textChunker: TextChunker,
-        textExtractor: TextExtractor,
-        embeddingGenerator: EmbeddingGenerator,
+        documentProcessor: DocumentProcessor,
         documentProcessingScheduler: DocumentProcessingScheduler
     ): DocumentRepository {
         return DocumentRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
-            textChunker,
-            textExtractor,
-            embeddingGenerator,
+            documentProcessor,
             documentProcessingScheduler
         )
     }

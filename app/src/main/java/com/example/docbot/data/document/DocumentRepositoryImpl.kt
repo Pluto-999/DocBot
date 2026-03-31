@@ -4,10 +4,7 @@ import android.net.Uri
 import com.example.docbot.data.models.ProcessingStatus
 import com.example.docbot.data.conversation.ConversationLocalDataSource
 import com.example.docbot.data.document.processing.DocumentProcessingScheduler
-import com.example.docbot.data.document.processing.TextChunker
-import com.example.docbot.data.document.processing.TextExtractor
-import com.example.docbot.data.embedding.EmbeddingGenerator
-import com.google.ai.edge.localagents.rag.models.EmbedData
+import com.example.docbot.data.document.processing.DocumentProcessor
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -17,11 +14,8 @@ class DocumentRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
     private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
-    private val textChunker: TextChunker,
-    private val textExtractor: TextExtractor,
-    private val embeddingGenerator: EmbeddingGenerator,
+    private val documentProcessor: DocumentProcessor,
     private val documentProcessingScheduler: DocumentProcessingScheduler
-
 ) : DocumentRepository {
 
     override fun getDocumentTitles(conversationId: Long): Flow<List<String>> {
@@ -58,37 +52,32 @@ class DocumentRepositoryImpl @Inject constructor(
             return false // unsuccessful process, since we are already at max documents !
         }
 
-        val documentName = textExtractor.getDocumentName(uri)
+        // returns false here since no text could be extracted
+        val extractedData = documentProcessor.extractDocumentData(uri) ?: return false
 
-        // get the hash to be used as the uniqueWorkName
-        val extractedText = textExtractor.extractText(uri)
-        if (extractedText.isEmpty()) return false
-        val contentsHash = textExtractor.getDocumentHash(extractedText)
-
-        val documentInDb = documentLocalDataSource.findDocumentHash(contentsHash)
+        val documentInDb = documentLocalDataSource.findDocumentHash(extractedData.documentHash)
 
         // if the document is in the database, we need to link it to this conversation
         // also, need to get the processing status of it !!! -- should this now be implicit ??
         if (documentInDb) {
-            documentLocalDataSource.linkDocumentToConversation(conversationId, contentsHash)
+            documentLocalDataSource.linkDocumentToConversation(conversationId, extractedData.documentHash)
         }
 
         // otherwise, create the worker
         else {
             val documentId = insertDocumentToProcess(
-                documentName,
-                contentsHash,
+                extractedData.documentName,
+                extractedData.documentHash,
                 conversationId
             )
 
             documentProcessingScheduler.scheduleProcessing(
-                contentsHash,
-                extractedText,
+                extractedData.documentHash,
+                extractedData.extractedText,
                 documentId,
                 conversationId
             )
         }
-
         return true
     }
 
@@ -98,15 +87,14 @@ class DocumentRepositoryImpl @Inject constructor(
         documentId: Long,
         documentContents: String
     ) {
-        val chunkedText = textChunker.chunk(documentContents)
-        val overlappedChunks = textChunker.addOverlap(chunkedText)
-        for (chunk in overlappedChunks) {
-            val embedding = embeddingGenerator.generateEmbedding(
-                chunk,
-                EmbedData.TaskType.RETRIEVAL_DOCUMENT,
-                false
+        val processedChunks = documentProcessor.getProcessedChunks(documentContents)
+
+        for (chunk in processedChunks) {
+            documentChunkLocalDataSource.insertDocumentChunk(
+                chunk.contents,
+                chunk.embedding,
+                documentId
             )
-            documentChunkLocalDataSource.insertDocumentChunk(chunk, embedding, documentId)
         }
     }
 }
