@@ -23,6 +23,8 @@ import com.example.docbot.data.document.processing.TextExtractor
 import com.example.docbot.data.embedding.EmbeddingGenerator
 import com.example.docbot.data.embedding.GemmaEmbeddingGenerator
 import com.example.docbot.data.message.MessageLocalDataSource
+import com.example.docbot.data.message.generation.MessageGenerator
+import com.example.docbot.data.message.generation.PromptFormatter
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
@@ -86,14 +88,16 @@ object AppModule {
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
         embeddingGenerator: EmbeddingGenerator,
-        engine: Engine
+        messageGenerator: MessageGenerator,
+        promptFormatter: PromptFormatter
     ): MessageRepository {
         return MessageRepositoryImpl(
             messageLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
             embeddingGenerator,
-            engine
+            messageGenerator,
+            promptFormatter
         )
     }
 
@@ -117,12 +121,6 @@ object AppModule {
             embeddingGenerator,
             documentProcessingScheduler
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideTextChunker(): TextChunker {
-        return TextChunker()
     }
 
     @Provides

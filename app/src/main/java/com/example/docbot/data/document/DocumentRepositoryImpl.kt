@@ -50,7 +50,6 @@ class DocumentRepositoryImpl @Inject constructor(
         documentLocalDataSource.updateProcessingStatus(documentId, processingStatus)
     }
 
-
     // create the work request
     override suspend fun processDocument(uri: Uri, conversationId: Long): Boolean {
 
@@ -92,7 +91,6 @@ class DocumentRepositoryImpl @Inject constructor(
 
         return true
     }
-
 
     // this function is the logic that the worker needs to carry out (i.e. processing the chunks which takes time) !!
     // (therefore, the ProcessDocumentExpeditedWorker just calls this method)

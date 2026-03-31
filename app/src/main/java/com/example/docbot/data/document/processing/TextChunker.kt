@@ -1,11 +1,13 @@
 package com.example.docbot.data.document.processing
 
+import javax.inject.Inject
+
 
 const val CHUNK_SIZE = 512
 const val CHARS_PER_TOKEN = 4
 val SEPARATORS = listOf("\n\n", "\n", " ", "")
 
-class TextChunker {
+class TextChunker @Inject constructor() {
 
     fun chunk(text: String): List<String> {
         return chunkText(text, 0)

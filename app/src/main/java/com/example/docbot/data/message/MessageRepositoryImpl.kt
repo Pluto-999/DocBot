@@ -1,16 +1,14 @@
 package com.example.docbot.data.message
 
-import android.os.Debug
-import android.util.Log
 import com.example.docbot.data.document.DocumentChunkLocalDataSource
 import com.example.docbot.data.document.DocumentLocalDataSource
 import com.example.docbot.data.embedding.EmbeddingGenerator
+import com.example.docbot.data.message.generation.MessageGenerator
+import com.example.docbot.data.message.generation.PromptFormatter
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
-import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 
 class MessageRepositoryImpl @Inject constructor(
@@ -18,10 +16,9 @@ class MessageRepositoryImpl @Inject constructor(
     private val documentLocalDataSource: DocumentLocalDataSource,
     private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
     private val embeddingGenerator: EmbeddingGenerator,
-    private val engine: Engine
+    private val messageGenerator: MessageGenerator,
+    private val promptFormatter: PromptFormatter
 ) : MessageRepository {
-
-    private var engineInitialised = false
 
     override fun getMessages(conversationId: Long): Flow<List<Message>> {
         return messageLocalDataSource.getMessages(conversationId)
@@ -38,41 +35,25 @@ class MessageRepositoryImpl @Inject constructor(
     override suspend fun generateResponse(conversationId: Long, message: String):
             Flow<com.google.ai.edge.litertlm.Message>
     {
+        val context = getFormattedContext(message, conversationId)
 
-        val initialisedEngine = getInitialisedEngine()
-        val conversation = initialisedEngine.createConversation()
+        val previousMessages = getFormattedPreviousMessages(conversationId)
 
-        val messageContexts = addMessageContexts(message, conversationId)
+        val fullContext = "$context\n\n$previousMessages"
 
-        val fullMessage = """
-            $messageContexts
+        val fullPrompt = """
+            $fullContext
             
             Answer the following prompt: $message 
         """.trimIndent()
 
-        val messageFlow = conversation.sendMessageAsync(
-            com.google.ai.edge.litertlm.Message.of(fullMessage)
-        )
-
-        return messageFlow
-            .onCompletion {
-                // TESTING MEMORY USAGE OF INFERENCE !!
-                val mi = Debug.MemoryInfo()
-                Debug.getMemoryInfo(mi)
-                Log.e("MEMORY", "Native: ${mi.nativePss} KB")
-
-                conversation.close()
-            }
+        return messageGenerator.generateResponse(fullPrompt)
     }
 
-    private suspend fun addMessageContexts(
-        prompt: String,
-        conversationId: Long
-    ): String {
-
+    private suspend fun getFormattedContext(message: String, conversationId: Long): String {
         // do the final stage of the RAG pipeline -- i.e. embed the message and get the relevant context
         val promptEmbedding = embeddingGenerator.generateEmbedding(
-            prompt,
+            message,
             EmbedData.TaskType.RETRIEVAL_QUERY,
             true
         )
@@ -80,41 +61,12 @@ class MessageRepositoryImpl @Inject constructor(
         val documentIds = documentLocalDataSource.getDocumentIds(conversationId)
         val promptContext = documentChunkLocalDataSource.getRelevantChunks(documentIds, promptEmbedding)
 
-        val contextString =
-            if (promptContext.isEmpty()) {
-                ""
-            } else {
-                """
-                    Use the following context, if relevant, when answering this prompt, alongside your own knowledge if required:
-                    ${promptContext.map { it }}
-                """.trimIndent()
-            }
+        return promptFormatter.formatMessageContext(promptContext)
+    }
 
+    private fun getFormattedPreviousMessages(conversationId: Long): String {
         val previousMessages = messageLocalDataSource.getRecentMessages(conversationId)
-
-        val previousMessagesFormatted = mutableListOf<String>()
-
-        previousMessages.forEach { message ->
-            if (message.messageType == MessageType.PROMPT) {
-                previousMessagesFormatted.add("Prompt asked by the user: ${message.contents}")
-            }
-            else if (message.messageType == MessageType.RESPONSE) {
-                previousMessagesFormatted.add("The response given by you: ${message.contents}")
-            }
-        }
-
-        val previousMessagesString =
-            if (previousMessages.isEmpty()) {
-                ""
-            }
-            else {
-                """
-                    Previous prompts and responses in chronological order, if relevant:
-                    ${previousMessagesFormatted.joinToString("\n")}
-                """.trimIndent()
-            }
-
-        return "$contextString\n\n$previousMessagesString"
+        return promptFormatter.formatPreviousMessages(previousMessages)
     }
 
     override fun saveResponse(conversationId: Long, message: String) {
@@ -123,13 +75,5 @@ class MessageRepositoryImpl @Inject constructor(
             message,
             MessageType.RESPONSE
         )
-    }
-
-    private fun getInitialisedEngine(): Engine {
-        if (!engineInitialised) {
-            engine.initialize()
-            engineInitialised = true
-        }
-        return engine
     }
 }
