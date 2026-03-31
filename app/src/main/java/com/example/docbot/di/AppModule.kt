@@ -14,6 +14,7 @@ import com.example.docbot.data.document.DocumentRepositoryImpl
 import com.example.docbot.data.message.MessageRepository
 import com.example.docbot.data.message.MessageRepositoryImpl
 import com.example.docbot.data.conversation.ConversationLocalDataSource
+import com.example.docbot.data.conversation.ConversationWorkScheduler
 import com.example.docbot.data.document.DocumentChunkLocalDataSource
 import com.example.docbot.data.document.DocumentLocalDataSource
 import com.example.docbot.data.document.processing.DocumentProcessingScheduler
@@ -72,12 +73,12 @@ object AppModule {
     fun provideConversationRepository(
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
-        workManager: WorkManager
+        conversationWorkScheduler: ConversationWorkScheduler
     ): ConversationRepository {
         return ConversationRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
-            workManager
+            conversationWorkScheduler
         )
     }
 
