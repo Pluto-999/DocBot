@@ -126,6 +126,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideTextChunker(): TextChunker {
+        return TextChunker()
+    }
+
+    @Provides
+    @Singleton
     fun provideTextExtractor(
         @ApplicationContext applicationContext: Context
     ): TextExtractor {

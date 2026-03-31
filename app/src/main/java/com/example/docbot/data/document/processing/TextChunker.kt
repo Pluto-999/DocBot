@@ -1,13 +1,13 @@
 package com.example.docbot.data.document.processing
 
-import javax.inject.Inject
-
 
 const val CHUNK_SIZE = 512
 const val CHARS_PER_TOKEN = 4
 val SEPARATORS = listOf("\n\n", "\n", " ", "")
 
-class TextChunker @Inject constructor() {
+class TextChunker (
+    private val separators: List<String> = SEPARATORS
+) {
 
     fun chunk(text: String): List<String> {
         return chunkText(text, 0)
@@ -15,13 +15,13 @@ class TextChunker @Inject constructor() {
 
     private fun chunkText(text: String, splitIndex: Int): List<String> {
         // base cases -- exhausted all separators, or text is less than chunk size
-        if (splitIndex >= SEPARATORS.size || estimateChunkSize(text) <= CHUNK_SIZE) {
+        if (splitIndex >= separators.size || estimateChunkSize(text) <= CHUNK_SIZE) {
             return listOf(text)
         }
 
         val finalChunks = mutableListOf<String>()
 
-        val splitText = text.split(SEPARATORS[splitIndex]).filter { it.isNotBlank() }
+        val splitText = text.split(separators[splitIndex]).filter { it.isNotBlank() }
 
         var combinedChunks = ""
 
@@ -42,7 +42,7 @@ class TextChunker @Inject constructor() {
 
             // this is the case where we can add the current chunk
             if (chunkSize + combinedChunksSize <= CHUNK_SIZE) {
-                combinedChunks += if (combinedChunks.isEmpty()) chunk else SEPARATORS[splitIndex] + chunk
+                combinedChunks += if (combinedChunks.isEmpty()) chunk else separators[splitIndex] + chunk
             }
             // otherwise, if we add the current chunk, it will go over the chunk size !!
             // therefore, we MUST add combinedChunks to the final chunks
