@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.kotlinx.guava)
     implementation(libs.androidx.protobuf)
     implementation(libs.androidx.pdfbox)
+    implementation(libs.kotlinx.collections)
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.junit)
