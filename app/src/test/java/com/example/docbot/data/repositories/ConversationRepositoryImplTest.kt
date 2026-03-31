@@ -1,8 +1,9 @@
 package com.example.docbot.data.repositories
 
 import androidx.work.WorkManager
-import com.example.docbot.data.sources.ConversationLocalDataSource
-import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.example.docbot.data.conversation.ConversationRepositoryImpl
+import com.example.docbot.data.conversation.ConversationLocalDataSource
+import com.example.docbot.data.document.DocumentLocalDataSource
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*

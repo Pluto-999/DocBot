@@ -2,7 +2,7 @@ package com.example.docbot.ui.screens
 
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
-import com.example.docbot.data.repositories.MessageRepository
+import com.example.docbot.data.message.MessageRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf

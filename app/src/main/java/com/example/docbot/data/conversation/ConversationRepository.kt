@@ -1,4 +1,4 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.conversation
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.ui.screens.home.ConversationFilter

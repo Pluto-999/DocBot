@@ -1,13 +1,12 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.message
 
 import android.os.Debug
 import android.util.Log
-import com.example.docbot.data.embedding.generateEmbedding
+import com.example.docbot.data.document.DocumentChunkLocalDataSource
+import com.example.docbot.data.document.DocumentLocalDataSource
+import com.example.docbot.data.embedding.EmbeddingGenerator
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
-import com.example.docbot.data.sources.DocumentChunkLocalDataSource
-import com.example.docbot.data.sources.DocumentLocalDataSource
-import com.example.docbot.data.sources.MessageLocalDataSource
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +17,7 @@ class MessageRepositoryImpl @Inject constructor(
     private val messageLocalDataSource: MessageLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
     private val documentChunkLocalDataSource: DocumentChunkLocalDataSource,
+    private val embeddingGenerator: EmbeddingGenerator,
     private val engine: Engine
 ) : MessageRepository {
 
@@ -71,7 +71,7 @@ class MessageRepositoryImpl @Inject constructor(
     ): String {
 
         // do the final stage of the RAG pipeline -- i.e. embed the message and get the relevant context
-        val promptEmbedding = generateEmbedding(
+        val promptEmbedding = embeddingGenerator.generateEmbedding(
             prompt,
             EmbedData.TaskType.RETRIEVAL_QUERY,
             true

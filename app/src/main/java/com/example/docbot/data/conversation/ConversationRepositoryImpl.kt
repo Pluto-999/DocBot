@@ -1,12 +1,12 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.conversation
 
 import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.docbot.data.models.Conversation
-import com.example.docbot.data.sources.ConversationLocalDataSource
-import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.example.docbot.data.conversation.ConversationLocalDataSource
+import com.example.docbot.data.document.DocumentLocalDataSource
 import com.example.docbot.ui.screens.home.ConversationFilter
 import com.example.docbot.ui.screens.home.ConversationOrder
 import com.example.docbot.workers.ConversationDeletionWorker

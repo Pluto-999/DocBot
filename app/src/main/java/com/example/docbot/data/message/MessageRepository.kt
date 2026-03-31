@@ -1,4 +1,4 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.message
 
 import com.example.docbot.data.models.Message
 import kotlinx.coroutines.flow.Flow

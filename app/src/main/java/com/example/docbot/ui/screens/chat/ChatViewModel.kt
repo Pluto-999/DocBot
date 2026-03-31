@@ -4,9 +4,9 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docbot.data.models.ProcessingStatus
-import com.example.docbot.data.repositories.ConversationRepository
-import com.example.docbot.data.repositories.DocumentRepository
-import com.example.docbot.data.repositories.MessageRepository
+import com.example.docbot.data.conversation.ConversationRepository
+import com.example.docbot.data.document.DocumentRepository
+import com.example.docbot.data.message.MessageRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

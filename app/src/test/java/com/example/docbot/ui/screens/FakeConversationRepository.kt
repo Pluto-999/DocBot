@@ -1,7 +1,7 @@
 package com.example.docbot.ui.screens
 
 import com.example.docbot.data.models.Conversation
-import com.example.docbot.data.repositories.ConversationRepository
+import com.example.docbot.data.conversation.ConversationRepository
 import com.example.docbot.ui.screens.home.ConversationFilter
 import com.example.docbot.ui.screens.home.ConversationOrder
 import kotlinx.coroutines.flow.Flow

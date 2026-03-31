@@ -1,4 +1,4 @@
-package com.example.docbot.data.sources
+package com.example.docbot.data.document
 
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
