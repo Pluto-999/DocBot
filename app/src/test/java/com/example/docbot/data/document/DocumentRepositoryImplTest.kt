@@ -28,7 +28,6 @@ class DocumentRepositoryImplTest {
     lateinit var documentProcessorMock: DocumentProcessor
     lateinit var documentProcessingSchedulerMock: DocumentProcessingScheduler
 
-
     lateinit var repository: DocumentRepository
 
     @Before
@@ -163,6 +162,7 @@ class DocumentRepositoryImplTest {
         assertTrue(result)
     }
 
+
     /****/
 
     @Test
@@ -195,8 +195,6 @@ class DocumentRepositoryImplTest {
             1
         ) }
     }
-
-
 
     @Test
     fun testProcessChunksDoesNothingWithEmptyContents() = runTest {

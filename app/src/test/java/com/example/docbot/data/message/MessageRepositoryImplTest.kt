@@ -2,12 +2,9 @@ package com.example.docbot.data.message
 
 import com.example.docbot.data.document.DocumentChunkLocalDataSource
 import com.example.docbot.data.document.DocumentLocalDataSource
-import com.example.docbot.data.embedding.EmbeddingGenerator
-import com.example.docbot.data.message.generation.MessageGenerator
-import com.example.docbot.data.message.generation.PromptFormatter
+import com.example.docbot.data.message.generation.MessageProcessor
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
-import com.google.ai.edge.localagents.rag.models.EmbedData
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -25,9 +22,7 @@ class MessageRepositoryImplTest {
     lateinit var messageLocalDataSourceMock: MessageLocalDataSource
     lateinit var documentLocalDataSourceMock: DocumentLocalDataSource
     lateinit var documentChunkLocalDataSourceMock: DocumentChunkLocalDataSource
-    lateinit var embeddingGeneratorMock: EmbeddingGenerator
-    lateinit var messageGeneratorMock: MessageGenerator
-    lateinit var promptFormatterMock: PromptFormatter
+    lateinit var messageProcessorMock: MessageProcessor
 
     lateinit var repository: MessageRepository
 
@@ -36,17 +31,13 @@ class MessageRepositoryImplTest {
         messageLocalDataSourceMock = mockk<MessageLocalDataSource>()
         documentLocalDataSourceMock = mockk<DocumentLocalDataSource>()
         documentChunkLocalDataSourceMock = mockk<DocumentChunkLocalDataSource>()
-        embeddingGeneratorMock = mockk<EmbeddingGenerator>()
-        messageGeneratorMock = mockk<MessageGenerator>()
-        promptFormatterMock = mockk<PromptFormatter>()
+        messageProcessorMock = mockk<MessageProcessor>()
 
         repository = MessageRepositoryImpl(
             messageLocalDataSourceMock,
             documentLocalDataSourceMock,
             documentChunkLocalDataSourceMock,
-            embeddingGeneratorMock,
-            messageGeneratorMock,
-            promptFormatterMock
+            messageProcessorMock
         )
     }
 
@@ -85,66 +76,40 @@ class MessageRepositoryImplTest {
 
     @Test
     fun testGenerateResponseBuildsFullPromptAndDelegatesToGenerator() = runTest {
-        val fakeEmbedding = com.google.common.collect.ImmutableList.of(1.0f, 2.0f)
-        val fakeDocIds = listOf<Long>(1, 2)
-        val fakeChunks = listOf("chunk1", "chunk2")
-        val fakeMessages = listOf(
-            Message(messageType = MessageType.PROMPT),
-            Message(messageType = MessageType.RESPONSE)
-        )
-        val fakeResponseFlow = flowOf(
-            com.google.ai.edge.litertlm.Message.of("response")
-        )
+        val promptEmbedding = com.google.common.collect.ImmutableList.of(1.0f, 2.0f)
+        val documentIds = listOf<Long>(1, 2)
+        val promptContext = listOf("chunk1", "chunk2")
+        val previousMessages = listOf(Message(contents = "test", messageType = MessageType.PROMPT))
+        val responseFlow = flowOf(com.google.ai.edge.litertlm.Message.of("response"))
 
-        // getFormattedContext
-        coEvery {
-            embeddingGeneratorMock.generateEmbedding("test message", EmbedData.TaskType.RETRIEVAL_QUERY, true)
-        } returns fakeEmbedding
-        every { documentLocalDataSourceMock.getDocumentIds(1) } returns fakeDocIds
-        every { documentChunkLocalDataSourceMock.getRelevantChunks(fakeDocIds, fakeEmbedding) } returns fakeChunks
-        every { promptFormatterMock.formatMessageContext(fakeChunks) } returns "formatted context"
-
-        // getFormattedPreviousMessages
-        every { messageLocalDataSourceMock.getRecentMessages(1) } returns fakeMessages
-        every { promptFormatterMock.formatPreviousMessages(fakeMessages) } returns "formatted messages"
-
-        every { messageGeneratorMock.generateResponse(any()) } returns fakeResponseFlow
+        coEvery { messageProcessorMock.generatePromptEmbedding("test message") } returns promptEmbedding
+        every { documentLocalDataSourceMock.getDocumentIds(1) } returns documentIds
+        every { documentChunkLocalDataSourceMock.getRelevantChunks(documentIds, promptEmbedding) } returns promptContext
+        every { messageLocalDataSourceMock.getRecentMessages(1) } returns previousMessages
+        every { messageProcessorMock.generateResponse(promptContext, previousMessages, "test message") } returns responseFlow
 
         val result = repository.generateResponse(1, "test message")
 
-        assertEquals(fakeResponseFlow, result)
-
-        verify { messageGeneratorMock.generateResponse(match { prompt ->
-            prompt.contains("formatted context") &&
-                    prompt.contains("formatted messages") &&
-                    prompt.contains("test message")
-        })}
+        assertEquals(responseFlow, result)
+        verify { messageProcessorMock.generateResponse(promptContext, previousMessages, "test message") }
     }
 
     @Test
     fun testGenerateResponseWithNoDocumentsAndNoPreviousMessages() = runTest {
-        val fakeEmbedding = com.google.common.collect.ImmutableList.of(1.0f)
-        val fakeResponseFlow = flowOf(
+        val promptEmbedding = com.google.common.collect.ImmutableList.of(1.0f)
+        val responseFlow = flowOf(
             com.google.ai.edge.litertlm.Message.of("response")
         )
 
-        // getFormattedContext
-        coEvery {
-            embeddingGeneratorMock.generateEmbedding(any(), any(), any())
-        } returns fakeEmbedding
+        coEvery { messageProcessorMock.generatePromptEmbedding("test") } returns promptEmbedding
         every { documentLocalDataSourceMock.getDocumentIds(1) } returns emptyList()
-        every { documentChunkLocalDataSourceMock.getRelevantChunks(emptyList(), fakeEmbedding) } returns emptyList()
-        every { promptFormatterMock.formatMessageContext(emptyList()) } returns ""
-
-        // getFormattedPreviousMessages
+        every { documentChunkLocalDataSourceMock.getRelevantChunks(emptyList(), promptEmbedding) } returns emptyList()
         every { messageLocalDataSourceMock.getRecentMessages(1) } returns emptyList()
-        every { promptFormatterMock.formatPreviousMessages(emptyList()) } returns ""
+        every { messageProcessorMock.generateResponse(emptyList(), emptyList(), "test") } returns responseFlow
 
-        every { messageGeneratorMock.generateResponse(any()) } returns fakeResponseFlow
+        val result = repository.generateResponse(1L, "test")
 
-        val result = repository.generateResponse(1, "hello")
-
-        assertEquals(fakeResponseFlow, result)
+        assertEquals(responseFlow, result)
     }
 
 
