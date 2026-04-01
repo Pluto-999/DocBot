@@ -84,8 +84,4 @@ class ConversationRepositoryImpl @Inject constructor(
     override fun getConversationTitle(conversationId: Long): String? {
         return conversationLocalDataSource.getConversationTitleFromId(conversationId)
     }
-
-    override fun scheduleOldConversationsDeletion() {
-        conversationWorkScheduler.scheduleDeletion()
-    }
 }

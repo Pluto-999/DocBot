@@ -17,5 +17,4 @@ interface ConversationRepository {
     fun getConversationTitle(conversationId: Long): String?
     fun updateTitle(conversationId: Long, title: String)
     fun toggleFavourite(conversationId: Long, isFavourite: Boolean): Boolean
-    fun scheduleOldConversationsDeletion()
 }

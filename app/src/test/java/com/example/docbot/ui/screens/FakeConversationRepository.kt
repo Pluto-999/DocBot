@@ -65,7 +65,4 @@ class FakeConversationRepository: ConversationRepository {
         conversationsFlow.value = conversations.toList()
         return favouriteToggleSuccess
     }
-
-    override fun scheduleOldConversationsDeletion() { }
-
 }

@@ -186,15 +186,4 @@ class ConversationRepositoryImplTest {
         assertEquals("Test", conversationTitle)
     }
 
-
-    /****/
-
-    @Test
-    fun testScheduleOldConversationsDeletionDelegatesToWorker() {
-        every { conversationWorkSchedulerMock.scheduleDeletion() } just runs
-
-        repository.scheduleOldConversationsDeletion()
-
-        verify { conversationWorkSchedulerMock.scheduleDeletion() }
-    }
 }
