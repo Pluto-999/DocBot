@@ -31,11 +31,11 @@ class MessageProcessor @Inject constructor(
         val formattedPreviousMessages = promptFormatter.formatPreviousMessages(previousMessages)
 
         val fullPrompt = """
+            Answer the following prompt: $prompt
+            
             $formattedContext
             
             $formattedPreviousMessages
-            
-            Answer the following prompt: $prompt
         """.trimIndent()
 
         return messageGenerator.generateResponse(fullPrompt)

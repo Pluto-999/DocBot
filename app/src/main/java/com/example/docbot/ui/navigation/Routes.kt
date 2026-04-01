@@ -4,6 +4,8 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
+data object LoadingPage: NavKey
+@Serializable
 data object HomePage: NavKey
 @Serializable
 data class ChatPage(val id: Long): NavKey

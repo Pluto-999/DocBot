@@ -13,10 +13,16 @@ class MessageGenerator @Inject constructor(
 
     private var engineInitialised = false
 
+    fun initialiseEngine() {
+        if (!engineInitialised) {
+            engine.initialize()
+            engineInitialised = true
+        }
+    }
+
     fun generateResponse(fullPrompt: String): Flow<com.google.ai.edge.litertlm.Message> {
 
-        val initialisedEngine = getInitialisedEngine()
-        val conversation = initialisedEngine.createConversation()
+        val conversation = engine.createConversation()
 
         val messageFlow = conversation.sendMessageAsync(
             com.google.ai.edge.litertlm.Message.of(fullPrompt)
@@ -31,13 +37,5 @@ class MessageGenerator @Inject constructor(
 
                 conversation.close()
             }
-    }
-
-    private fun getInitialisedEngine(): Engine {
-        if (!engineInitialised) {
-            engine.initialize()
-            engineInitialised = true
-        }
-        return engine
     }
 }

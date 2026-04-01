@@ -16,7 +16,7 @@ class GemmaEmbeddingGenerator: EmbeddingGenerator {
         val embeddingModel = GemmaEmbeddingModel(
             "/data/local/tmp/slm/embeddinggemma-300M_seq1024_mixed-precision.tflite",
             "/data/local/tmp/slm/sentencepiece.model",
-            false
+            true
         )
 
         val dataToEmbed = EmbedData.create<String>(data, taskType, isQuery)
