@@ -26,6 +26,7 @@ import com.example.docbot.data.embedding.EmbeddingGenerator
 import com.example.docbot.data.embedding.GemmaEmbeddingGenerator
 import com.example.docbot.data.message.MessageLocalDataSource
 import com.example.docbot.data.message.generation.MessageGenerator
+import com.example.docbot.data.message.generation.MessageProcessor
 import com.example.docbot.data.message.generation.PromptFormatter
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Engine
@@ -89,17 +90,13 @@ object AppModule {
         messageLocalDataSource: MessageLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
-        embeddingGenerator: EmbeddingGenerator,
-        messageGenerator: MessageGenerator,
-        promptFormatter: PromptFormatter
+        messageProcessor: MessageProcessor
     ): MessageRepository {
         return MessageRepositoryImpl(
             messageLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
-            embeddingGenerator,
-            messageGenerator,
-            promptFormatter
+            messageProcessor
         )
     }
 
@@ -143,11 +140,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEngine(): Engine {
+    fun provideEngine(
+        @ApplicationContext applicationContext: Context
+    ): Engine {
         return Engine(
             EngineConfig(
-                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
-                backend = Backend.CPU
+//                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
+//                backend = Backend.CPU
+                modelPath = "${applicationContext.filesDir}/slm/gemma-3n-E2B-it-int4.litertlm",
+                backend = Backend.GPU
             )
         )
     }

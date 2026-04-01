@@ -11,7 +11,7 @@ class PromptFormatter @Inject constructor() {
         if (context.isEmpty()) return ""
 
         return """
-            Use the following context, if relevant, when answering this prompt, alongside your own knowledge if required:
+            Use the following context, if relevant, alongside your own knowledge if required:
             ${context.joinToString("\n")}
         """.trimIndent()
     }
