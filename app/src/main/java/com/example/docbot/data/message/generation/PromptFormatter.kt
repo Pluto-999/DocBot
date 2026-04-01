@@ -22,16 +22,15 @@ class PromptFormatter @Inject constructor() {
         val previousMessagesFormatted = mutableListOf<String>()
 
         previousMessages.forEach { message ->
-            if (message.messageType == MessageType.PROMPT) {
-                previousMessagesFormatted.add("Prompt asked by the user: ${message.contents}")
-            }
-            else if (message.messageType == MessageType.RESPONSE) {
-                previousMessagesFormatted.add("The response given by you: ${message.contents}")
+            when (message.messageType) {
+                MessageType.PROMPT -> previousMessagesFormatted.add("Prompt asked by the user: ${message.contents}")
+                MessageType.RESPONSE -> previousMessagesFormatted.add("The response given by you: ${message.contents}")
+                else -> ""
             }
         }
 
         val previousMessagesString =
-            if (previousMessages.isEmpty()) {
+            if (previousMessagesFormatted.isEmpty()) {
                 ""
             }
             else {
