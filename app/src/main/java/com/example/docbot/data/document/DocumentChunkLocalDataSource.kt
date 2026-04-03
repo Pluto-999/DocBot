@@ -19,10 +19,10 @@ class DocumentChunkLocalDataSource @Inject constructor(
         promptEmbedding: ImmutableList<Float>
     ): List<String> {
         val query = documentChunkBox.query(
+            DocumentChunk_.documentId.oneOf(documentIds.toLongArray()) and
             DocumentChunk_.embedding.nearestNeighbors(
                 promptEmbedding.toFloatArray(),
-                20) and
-                    DocumentChunk_.documentId.oneOf(documentIds.toLongArray())
+                15)
         ).build()
 
         val results = query.findWithScores()

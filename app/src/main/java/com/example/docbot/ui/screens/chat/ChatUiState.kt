@@ -1,6 +1,5 @@
 package com.example.docbot.ui.screens.chat
 
-import androidx.compose.material3.SnackbarHostState
 import com.example.docbot.data.models.MessageType
 
 data class ChatUiState(
@@ -12,7 +11,8 @@ data class ChatUiState(
     val currentResponseMessage: String = "",
     val documentNames: List<String> = listOf(),
     val documentProcessing: Boolean = false,
-    val modelProcessing: Boolean = false,
+    val modelInference: Boolean = false,
+    val modelResponding: Boolean = false,
     val errorMessage: String? = null
 )
 

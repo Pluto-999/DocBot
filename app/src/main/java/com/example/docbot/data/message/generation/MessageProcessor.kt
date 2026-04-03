@@ -30,13 +30,17 @@ class MessageProcessor @Inject constructor(
 
         val formattedPreviousMessages = promptFormatter.formatPreviousMessages(previousMessages)
 
-        val fullPrompt = """
-            Answer the following prompt: $prompt
-            
-            $formattedContext
-            
-            $formattedPreviousMessages
-        """.trimIndent()
+        val fullPrompt = buildString {
+            if (formattedContext.isNotBlank()) {
+                append(formattedContext)
+                append("\n\n")
+            }
+            if (formattedPreviousMessages.isNotBlank()) {
+                append(formattedPreviousMessages)
+                append("\n\n")
+            }
+            append("Answer the following prompt: $prompt")
+        }.trim()
 
         return messageGenerator.generateResponse(fullPrompt)
     }

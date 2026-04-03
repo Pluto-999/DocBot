@@ -83,22 +83,28 @@ class ChatViewModel @AssistedInject constructor(
 
         _uiState.update { it.copy(
             currentUserMessage = "",
-            modelProcessing = true
+            modelInference = true
         ) }
 
         // then, in the coroutine, generate the response
         viewModelScope.launch(defaultDispatcher) {
+            var isFirstWord = true
+
             messageRepository
                 .generateResponse(conversationId, messageToSend)
                 .onCompletion {
-                    val response = _uiState.value.currentResponseMessage
+                    val response = _uiState.value.currentResponseMessage.trimEnd()
                     messageRepository.saveResponse(conversationId, response)
                     _uiState.update { it.copy(
                         currentResponseMessage = "",
-                        modelProcessing = false
+                        modelResponding = false
                     ) }
                 }
                 .collect { value ->
+                    if (isFirstWord) {
+                        _uiState.update { it.copy(modelInference = false, modelResponding = true) }
+                        isFirstWord = false
+                    }
                     _uiState.update {
                         it.copy(currentResponseMessage = it.currentResponseMessage + value.toString())
                     }
