@@ -8,6 +8,7 @@ import com.example.docbot.ui.screens.FakeDocumentRepository
 import com.example.docbot.ui.screens.FakeMessageRepository
 import com.example.docbot.ui.screens.MainDispatcherRule
 import io.mockk.mockk
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -150,7 +151,7 @@ class ChatViewModelTest {
     /****/
 
     @Test
-    fun testSendMessageClearsCurrentMessageAndSetsModelProcessingAsTrue() = runTest {
+    fun testSendMessageClearsCurrentMessageAndSetsModelInferenceToTrue() = runTest {
         assertEquals(0, viewModel.uiState.value.messages.size)
 
         viewModel.updateCurrentMessage("Test")
@@ -159,7 +160,7 @@ class ChatViewModelTest {
         viewModel.sendMessage()
 
         assertEquals("", viewModel.uiState.value.currentUserMessage)
-        assertTrue(viewModel.uiState.value.modelProcessing)
+        assertTrue(viewModel.uiState.value.modelInference)
     }
 
 
@@ -180,13 +181,29 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun testSendMessageClearsCurrentResponseMessageAndSetsModelProcessingAsFalseOnCompletion() = runTest {
+    fun testSendMessageClearsCurrentResponseMessageAndSetsModelRespondingToFalseOnCompletion() = runTest {
         viewModel.sendMessage()
 
         advanceUntilIdle()
 
         assertEquals("", viewModel.uiState.value.currentUserMessage)
-        assertFalse(viewModel.uiState.value.modelProcessing)
+        assertFalse(viewModel.uiState.value.modelResponding)
+    }
+
+    @Test
+    fun testSendMessageSetsModelRespondingToTrueAndModelInferenceToFalseOnFirstEmission() = runTest {
+        viewModel.updateCurrentMessage("Test")
+        viewModel.sendMessage()
+
+        advanceTimeBy(50)
+
+        assertTrue(viewModel.uiState.value.modelResponding)
+        assertFalse(viewModel.uiState.value.modelInference)
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.modelResponding)
+        assertFalse(viewModel.uiState.value.modelInference)
     }
 
 
