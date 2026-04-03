@@ -28,6 +28,7 @@ kotlinGuava = "1.10.2"
 protoBuf = "4.34.0"
 mockk = "1.14.9"
 coroutine-test = "1.10.2"
+collections = "0.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -65,6 +66,7 @@ kotlinx-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-gu
 androidx-protobuf = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protoBuf" }
 kotlinx-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine-test" }
+kotlinx-collections = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "collections" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

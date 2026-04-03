@@ -1,7 +1,6 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.document
 
 import android.net.Uri
-import androidx.work.WorkInfo
 import com.example.docbot.data.models.ProcessingStatus
 import kotlinx.coroutines.flow.Flow
 

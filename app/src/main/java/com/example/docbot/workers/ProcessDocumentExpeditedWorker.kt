@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.docbot.data.repositories.DocumentRepository
+import com.example.docbot.data.document.DocumentRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import com.example.docbot.data.models.ProcessingStatus

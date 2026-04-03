@@ -7,16 +7,27 @@ import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
 import com.example.docbot.data.models.Message
-import com.example.docbot.data.repositories.ConversationRepository
-import com.example.docbot.data.repositories.ConversationRepositoryImpl
-import com.example.docbot.data.repositories.DocumentRepository
-import com.example.docbot.data.repositories.DocumentRepositoryImpl
-import com.example.docbot.data.repositories.MessageRepository
-import com.example.docbot.data.repositories.MessageRepositoryImpl
-import com.example.docbot.data.sources.ConversationLocalDataSource
-import com.example.docbot.data.sources.DocumentChunkLocalDataSource
-import com.example.docbot.data.sources.DocumentLocalDataSource
-import com.example.docbot.data.sources.MessageLocalDataSource
+import com.example.docbot.data.conversation.ConversationRepository
+import com.example.docbot.data.conversation.ConversationRepositoryImpl
+import com.example.docbot.data.document.DocumentRepository
+import com.example.docbot.data.document.DocumentRepositoryImpl
+import com.example.docbot.data.message.MessageRepository
+import com.example.docbot.data.message.MessageRepositoryImpl
+import com.example.docbot.data.conversation.ConversationLocalDataSource
+import com.example.docbot.data.conversation.ConversationWorkScheduler
+import com.example.docbot.data.document.DocumentChunkLocalDataSource
+import com.example.docbot.data.document.DocumentLocalDataSource
+import com.example.docbot.data.document.processing.DocumentProcessingScheduler
+import com.example.docbot.data.document.processing.DocumentProcessor
+import com.example.docbot.data.document.processing.PdfTextExtractor
+import com.example.docbot.data.document.processing.TextChunker
+import com.example.docbot.data.document.processing.TextExtractor
+import com.example.docbot.data.embedding.EmbeddingGenerator
+import com.example.docbot.data.embedding.GemmaEmbeddingGenerator
+import com.example.docbot.data.message.MessageLocalDataSource
+import com.example.docbot.data.message.generation.MessageGenerator
+import com.example.docbot.data.message.generation.MessageProcessor
+import com.example.docbot.data.message.generation.PromptFormatter
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
@@ -64,12 +75,12 @@ object AppModule {
     fun provideConversationRepository(
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
-        workManager: WorkManager
+        conversationWorkScheduler: ConversationWorkScheduler
     ): ConversationRepository {
         return ConversationRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
-            workManager
+            conversationWorkScheduler
         )
     }
 
@@ -79,13 +90,13 @@ object AppModule {
         messageLocalDataSource: MessageLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
-        engine: Engine
+        messageProcessor: MessageProcessor
     ): MessageRepository {
         return MessageRepositoryImpl(
             messageLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
-            engine
+            messageProcessor
         )
     }
 
@@ -95,25 +106,49 @@ object AppModule {
         conversationLocalDataSource: ConversationLocalDataSource,
         documentLocalDataSource: DocumentLocalDataSource,
         documentChunkLocalDataSource: DocumentChunkLocalDataSource,
-        workManager: WorkManager,
-        @ApplicationContext applicationContext: Context
+        documentProcessor: DocumentProcessor,
+        documentProcessingScheduler: DocumentProcessingScheduler
     ): DocumentRepository {
         return DocumentRepositoryImpl(
             conversationLocalDataSource,
             documentLocalDataSource,
             documentChunkLocalDataSource,
-            workManager,
-            applicationContext
+            documentProcessor,
+            documentProcessingScheduler
         )
     }
 
     @Provides
     @Singleton
-    fun provideEngine(): Engine {
+    fun provideTextChunker(): TextChunker {
+        return TextChunker()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTextExtractor(
+        @ApplicationContext applicationContext: Context
+    ): TextExtractor {
+        return PdfTextExtractor(applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmbeddingGenerator(): EmbeddingGenerator {
+        return GemmaEmbeddingGenerator()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEngine(
+        @ApplicationContext applicationContext: Context
+    ): Engine {
         return Engine(
             EngineConfig(
-                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
-                backend = Backend.CPU
+//                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
+//                backend = Backend.CPU
+                modelPath = "${applicationContext.filesDir}/slm/gemma-3n-E2B-it-int4.litertlm",
+                backend = Backend.GPU
             )
         )
     }

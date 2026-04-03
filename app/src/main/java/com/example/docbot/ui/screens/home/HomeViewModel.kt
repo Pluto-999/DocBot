@@ -2,7 +2,7 @@ package com.example.docbot.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.docbot.data.repositories.ConversationRepository
+import com.example.docbot.data.conversation.ConversationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

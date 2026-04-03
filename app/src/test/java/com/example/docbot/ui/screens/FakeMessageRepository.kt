@@ -2,10 +2,11 @@ package com.example.docbot.ui.screens
 
 import com.example.docbot.data.models.Message
 import com.example.docbot.data.models.MessageType
-import com.example.docbot.data.repositories.MessageRepository
+import com.example.docbot.data.message.MessageRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 
 class FakeMessageRepository: MessageRepository {
 
@@ -26,7 +27,11 @@ class FakeMessageRepository: MessageRepository {
         conversationId: Long,
         message: String
     ): Flow<com.google.ai.edge.litertlm.Message> {
-        return flowOf(com.google.ai.edge.litertlm.Message.of("Fake response"))
+        return flow {
+            emit(com.google.ai.edge.litertlm.Message.of("Fake "))
+            delay(100)
+            emit(com.google.ai.edge.litertlm.Message.of("response"))
+        }
     }
 
     override fun saveResponse(conversationId: Long, message: String) {

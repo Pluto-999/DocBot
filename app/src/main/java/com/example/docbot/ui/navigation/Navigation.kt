@@ -8,10 +8,11 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.docbot.ui.screens.chat.ChatScreen
 import com.example.docbot.ui.screens.home.HomeScreen
+import com.example.docbot.ui.screens.loading.LoadingScreen
 
 @Composable
 fun Navigation() {
-    val backStack = rememberNavBackStack(HomePage)
+    val backStack = rememberNavBackStack(LoadingPage)
 
     NavDisplay(
         entryDecorators = listOf(
@@ -20,6 +21,14 @@ fun Navigation() {
         ),
         backStack = backStack,
         entryProvider = entryProvider {
+            entry<LoadingPage> {
+                LoadingScreen(
+                    onReady = {
+                        backStack.removeLastOrNull()
+                        backStack.add(HomePage)
+                    }
+                )
+            }
             entry<HomePage> {
                 HomeScreen(
                     onConversationNavigate = {

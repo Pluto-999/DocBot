@@ -1,4 +1,4 @@
-package com.example.docbot.data.sources
+package com.example.docbot.data.document
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Conversation_
@@ -44,7 +44,8 @@ class DocumentLocalDataSource @Inject constructor(
         conversationId: Long
     ): Long {
         return documentBox.store.callInTx {
-            val documentToInsert = Document(name = name, contentHash = hash, processingStatus = processingStatus)
+            val documentToInsert =
+                Document(name = name, contentHash = hash, processingStatus = processingStatus)
             val documentId = documentBox.put(documentToInsert)
 
             // the conversation "owns" the relationship between the conversation and document

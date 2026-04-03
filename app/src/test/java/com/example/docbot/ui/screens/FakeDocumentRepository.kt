@@ -2,7 +2,7 @@ package com.example.docbot.ui.screens
 
 import android.net.Uri
 import com.example.docbot.data.models.ProcessingStatus
-import com.example.docbot.data.repositories.DocumentRepository
+import com.example.docbot.data.document.DocumentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 

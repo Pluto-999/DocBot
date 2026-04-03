@@ -71,7 +71,7 @@ fun ChatScreen(
     }
 
     // cannot go back when the model is loading/processing/generating a response
-    BackHandler(uiState.modelProcessing) {
+    BackHandler(uiState.modelInference || uiState.modelResponding) {
         viewModel.displayBackMessage()
     }
 
@@ -93,7 +93,11 @@ fun ChatScreen(
                     }
                     IconButton(
                         onClick = {
-                            if (!uiState.documentProcessing && !uiState.modelProcessing) {
+                            if (
+                                !uiState.documentProcessing &&
+                                !uiState.modelInference &&
+                                !uiState.modelResponding
+                            ) {
                                 viewModel.toggleDocumentPickerDialog(true)
                             }
                         }
@@ -126,7 +130,11 @@ fun ChatScreen(
                 value = uiState.currentUserMessage,
                 onValueChange = { viewModel.updateCurrentMessage(newMessage = it) },
                 createMessage = { viewModel.sendMessage() },
-                enabled = !uiState.documentProcessing && !uiState.modelProcessing
+                enabled =
+                    !uiState.documentProcessing &&
+                    !uiState.modelInference &&
+                    !uiState.modelResponding
+
             )
         }
 
@@ -154,8 +162,8 @@ fun ChatScreen(
             LoadingIndicator(message = "Processing document")
         }
 
-        if (uiState.modelProcessing) {
-            LoadingIndicator(message = "Model response generating")
+        if (uiState.modelInference) {
+            LoadingIndicator(message = "Model generating response")
         }
     }
 }

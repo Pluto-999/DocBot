@@ -1,4 +1,4 @@
-package com.example.docbot.data.sources
+package com.example.docbot.data.document
 
 import com.example.docbot.data.models.Document
 import com.example.docbot.data.models.DocumentChunk
@@ -8,7 +8,7 @@ import io.objectbox.Box
 import io.objectbox.kotlin.and
 import javax.inject.Inject
 
-const val RETURNED_CHUNKS = 3
+const val RETURNED_CHUNKS = 5
 
 class DocumentChunkLocalDataSource @Inject constructor(
     private val documentBox: Box<Document>,
@@ -19,10 +19,10 @@ class DocumentChunkLocalDataSource @Inject constructor(
         promptEmbedding: ImmutableList<Float>
     ): List<String> {
         val query = documentChunkBox.query(
+            DocumentChunk_.documentId.oneOf(documentIds.toLongArray()) and
             DocumentChunk_.embedding.nearestNeighbors(
                 promptEmbedding.toFloatArray(),
-                20) and
-                    DocumentChunk_.documentId.oneOf(documentIds.toLongArray())
+                15)
         ).build()
 
         val results = query.findWithScores()

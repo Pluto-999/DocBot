@@ -1,23 +1,17 @@
-package com.example.docbot.data.repositories
+package com.example.docbot.data.conversation
 
 import android.util.Log
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.example.docbot.data.models.Conversation
-import com.example.docbot.data.sources.ConversationLocalDataSource
-import com.example.docbot.data.sources.DocumentLocalDataSource
+import com.example.docbot.data.document.DocumentLocalDataSource
 import com.example.docbot.ui.screens.home.ConversationFilter
 import com.example.docbot.ui.screens.home.ConversationOrder
-import com.example.docbot.workers.ConversationDeletionWorker
 import kotlinx.coroutines.flow.Flow
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ConversationRepositoryImpl @Inject constructor(
     private val conversationLocalDataSource: ConversationLocalDataSource,
     private val documentLocalDataSource: DocumentLocalDataSource,
-    private val workManager: WorkManager
+    private val conversationWorkScheduler: ConversationWorkScheduler
 ): ConversationRepository {
 
     override fun createConversation(): Long {
@@ -47,9 +41,9 @@ class ConversationRepositoryImpl @Inject constructor(
             // get the conversations that each document is associated with
             val associatedConversations = documentLocalDataSource.getConversationCountForDocument(document)
             // if it is just 1 conversation, that means it is the current conversation !!!
-            // therefore, can cancel the work
+            // therefore, can cancel the worker that is processing the document
             if (associatedConversations == 1) {
-                workManager.cancelUniqueWork(document.contentHash)
+                conversationWorkScheduler.cancelDocumentProcessing(document.contentHash)
             }
         }
         conversationLocalDataSource.deleteConversation(conversationId)
@@ -89,24 +83,5 @@ class ConversationRepositoryImpl @Inject constructor(
 
     override fun getConversationTitle(conversationId: Long): String? {
         return conversationLocalDataSource.getConversationTitleFromId(conversationId)
-    }
-
-    override fun scheduleOldConversationsDeletion() {
-        val deleteRequest = PeriodicWorkRequestBuilder<ConversationDeletionWorker>(
-            1, TimeUnit.HOURS
-        ).build()
-
-        workManager.enqueueUniquePeriodicWork(
-            uniqueWorkName = "deleteOldConversations",
-            existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.REPLACE,
-            request = deleteRequest
-        )
-
-        // One time request for testing only !!!
-
-//        val request = OneTimeWorkRequestBuilder<ConversationDeletionWorker>()
-//            .build()
-//
-//        workManager.enqueue(request)
     }
 }

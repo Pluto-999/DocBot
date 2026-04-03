@@ -1,4 +1,4 @@
-package com.example.docbot.data.sources
+package com.example.docbot.data.conversation
 
 import com.example.docbot.data.models.Conversation
 import com.example.docbot.data.models.Conversation_
