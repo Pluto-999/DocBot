@@ -72,7 +72,7 @@ class TextChunker (
 
                 val overlap = prevChunk.takeLast(overlapSize)
 
-                val newChunk = overlap + chunk
+                val newChunk = "$overlap $chunk"
                 overlappedChunks.add(newChunk)
             }
             else {

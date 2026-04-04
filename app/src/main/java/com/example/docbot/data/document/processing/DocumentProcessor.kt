@@ -33,13 +33,16 @@ class DocumentProcessor @Inject constructor(
     suspend fun getProcessedChunks(documentContents: String): List<ProcessedChunk> {
         val chunkedText = textChunker.chunk(documentContents)
         val overlappedChunks = textChunker.addOverlap(chunkedText)
-        return overlappedChunks.map { chunk ->
+
+        val processedChunks = mutableListOf<ProcessedChunk>()
+        for (chunk in overlappedChunks) {
             val embedding = embeddingGenerator.generateEmbedding(
                 chunk,
                 EmbedData.TaskType.RETRIEVAL_DOCUMENT,
                 false
             )
-            ProcessedChunk(chunk, embedding)
+            processedChunks.add(ProcessedChunk(chunk, embedding))
         }
+        return processedChunks
     }
 }
