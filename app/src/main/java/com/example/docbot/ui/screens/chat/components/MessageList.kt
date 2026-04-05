@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.docbot.data.models.MessageType
 import com.example.docbot.ui.screens.chat.MessageState
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,9 +36,13 @@ fun MessageList(
     val listState = rememberLazyListState()
     val isImeVisible = WindowInsets.isImeVisible
 
-    LaunchedEffect(isImeVisible) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size)
+    LaunchedEffect(messages.size, currentResponse, isImeVisible) {
+        if (isImeVisible) {
+            delay(300)
+        }
+        val totalItems = if (currentResponse.isNotEmpty()) messages.size + 1 else messages.size
+        if (totalItems > 0) {
+            listState.scrollToItem(index = totalItems - 1, scrollOffset = Int.MAX_VALUE)
         }
     }
 
