@@ -32,9 +32,9 @@ class MessageProcessor @Inject constructor(
 
         val fullPrompt = """
             Answer the following prompt: $prompt
-            
+            ----------------------
             $formattedContext
-            
+            ----------------------
             $formattedPreviousMessages
         """.trimIndent()
 
