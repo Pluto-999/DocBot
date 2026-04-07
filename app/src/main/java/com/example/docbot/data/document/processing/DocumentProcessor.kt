@@ -1,6 +1,7 @@
 package com.example.docbot.data.document.processing
 
 import android.net.Uri
+import android.util.Log
 import com.example.docbot.data.embedding.EmbeddingGenerator
 import com.google.ai.edge.localagents.rag.models.EmbedData
 import javax.inject.Inject
@@ -36,12 +37,16 @@ class DocumentProcessor @Inject constructor(
 
         val processedChunks = mutableListOf<ProcessedChunk>()
         for (chunk in overlappedChunks) {
-            val embedding = embeddingGenerator.generateEmbedding(
-                chunk,
-                EmbedData.TaskType.RETRIEVAL_DOCUMENT,
-                false
-            )
-            processedChunks.add(ProcessedChunk(chunk, embedding))
+            try {
+                val embedding = embeddingGenerator.generateEmbedding(
+                    chunk,
+                    EmbedData.TaskType.RETRIEVAL_DOCUMENT,
+                    false
+                )
+                processedChunks.add(ProcessedChunk(chunk, embedding))
+            } catch (e: Exception) {
+                Log.e("Embedding ERROR", "Embedding failed: ${e.message}")
+            }
         }
         return processedChunks
     }
