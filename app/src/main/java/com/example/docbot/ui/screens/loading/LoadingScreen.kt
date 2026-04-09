@@ -15,7 +15,7 @@ fun LoadingScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.initialise(context)
+        viewModel.initialise(context.filesDir)
         onReady()
     }
 
