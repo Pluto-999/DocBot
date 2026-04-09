@@ -8,7 +8,7 @@ import io.objectbox.Box
 import io.objectbox.kotlin.and
 import javax.inject.Inject
 
-const val RETURNED_CHUNKS = 5
+const val RETURNED_CHUNKS = 4
 
 class DocumentChunkLocalDataSource @Inject constructor(
     private val documentBox: Box<Document>,
