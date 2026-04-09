@@ -29,6 +29,8 @@ protoBuf = "4.34.0"
 mockk = "1.14.9"
 coroutine-test = "1.10.2"
 collections = "0.4.0"
+robolectric = "4.16.1"
+testCore = "1.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -67,6 +69,8 @@ androidx-protobuf = { group = "com.google.protobuf", name = "protobuf-javalite",
 kotlinx-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutine-test" }
 kotlinx-collections = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "collections" }
+kotlinx-robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "testCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
