@@ -1,8 +1,9 @@
 package com.example.docbot.data.message.generation
 
-import android.os.Debug
 import android.util.Log
+import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.SamplerConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
@@ -15,14 +16,23 @@ class MessageGenerator @Inject constructor(
 
     fun initialiseEngine() {
         if (!engineInitialised) {
-            engine.initialize()
+            try {
+                engine.initialize()
+            }
+            catch (e: IllegalStateException) {
+                Log.e("Engine initialisation", "$e")
+            }
             engineInitialised = true
         }
     }
 
     fun generateResponse(fullPrompt: String): Flow<com.google.ai.edge.litertlm.Message> {
 
-        val conversation = engine.createConversation()
+        val config = ConversationConfig(
+            samplerConfig = SamplerConfig(topK = 20, topP = 0.9, temperature = 0.3)
+        )
+
+        val conversation = engine.createConversation(config)
 
         val messageFlow = conversation.sendMessageAsync(
             com.google.ai.edge.litertlm.Message.of(fullPrompt)
@@ -30,11 +40,6 @@ class MessageGenerator @Inject constructor(
 
         return messageFlow
             .onCompletion {
-                // TESTING MEMORY USAGE OF INFERENCE !!
-                val mi = Debug.MemoryInfo()
-                Debug.getMemoryInfo(mi)
-                Log.e("MEMORY", "Native: ${mi.nativePss} KB")
-
                 conversation.close()
             }
     }
