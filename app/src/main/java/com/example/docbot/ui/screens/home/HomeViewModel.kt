@@ -117,21 +117,49 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(errorMessage = null) }
     }
 
-    fun toggleFilterMenu(newState: Boolean) {
-        _uiState.update { it.copy(filterMenuExpanded = newState) }
+    fun toggleFilterMenu() {
+        _uiState.update { it.copy(filterMenuExpanded = !it.filterMenuExpanded) }
     }
 
-    fun toggleSortMenu(newState: Boolean) {
-        _uiState.update { it.copy(sortMenuExpanded = newState) }
+    fun collapseFilterMenu() {
+        _uiState.update { it.copy(filterMenuExpanded = false) }
     }
 
-    fun updateConversationOrder(order: ConversationOrder) {
-        _uiState.update { it.copy(conversationOrder = order) }
+    fun toggleSortMenu() {
+        _uiState.update { it.copy(sortMenuExpanded = !it.sortMenuExpanded) }
+    }
+
+    fun collapseSortMenu() {
+        _uiState.update { it.copy(sortMenuExpanded = false) }
+    }
+
+    fun updateTitleOrder() {
+        if (_uiState.value.conversationOrder == ConversationOrder.TITLE_ASC) {
+            _uiState.update { it.copy(conversationOrder = ConversationOrder.TITLE_DESC) }
+        }
+        else {
+            _uiState.update { it.copy(conversationOrder = ConversationOrder.TITLE_ASC) }
+        }
         getConversations()
     }
 
-    fun updateConversationFilter(filter: ConversationFilter) {
-        _uiState.update { it.copy(conversationFilter = filter) }
+    fun updateDateOrder() {
+        if (_uiState.value.conversationOrder == ConversationOrder.DATE_ASC) {
+            _uiState.update { it.copy(conversationOrder = ConversationOrder.DATE_DESC) }
+        }
+        else {
+            _uiState.update { it.copy(conversationOrder = ConversationOrder.DATE_ASC) }
+        }
+        getConversations()
+    }
+
+    fun filterConversations(filter: ConversationFilter) {
+        if (filter == _uiState.value.conversationFilter) {
+            _uiState.update { it.copy(conversationFilter = ConversationFilter.NONE) }
+        }
+        else {
+            _uiState.update { it.copy(conversationFilter = filter) }
+        }
         getConversations()
     }
 

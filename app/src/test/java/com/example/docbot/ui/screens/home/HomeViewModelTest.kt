@@ -178,9 +178,10 @@ class HomeViewModelTest {
 
     @Test
     fun testToggleFilterMenu() {
-        viewModel.toggleFilterMenu(true)
+        assertFalse(viewModel.uiState.value.filterMenuExpanded)
+        viewModel.toggleFilterMenu()
         assertTrue(viewModel.uiState.value.filterMenuExpanded)
-        viewModel.toggleFilterMenu(false)
+        viewModel.toggleFilterMenu()
         assertFalse(viewModel.uiState.value.filterMenuExpanded)
     }
 
@@ -188,10 +189,22 @@ class HomeViewModelTest {
     /****/
 
     @Test
-    fun testToggleSortMenuOpens() {
-        viewModel.toggleSortMenu(true)
+    fun testCollapseFilterMenu() {
+        viewModel.toggleFilterMenu()
+        assertTrue(viewModel.uiState.value.filterMenuExpanded)
+        viewModel.collapseFilterMenu()
+        assertFalse(viewModel.uiState.value.filterMenuExpanded)
+    }
+
+
+    /****/
+
+    @Test
+    fun testToggleSortMenu() {
+        assertFalse(viewModel.uiState.value.sortMenuExpanded)
+        viewModel.toggleSortMenu()
         assertTrue(viewModel.uiState.value.sortMenuExpanded)
-        viewModel.toggleSortMenu(false)
+        viewModel.toggleSortMenu()
         assertFalse(viewModel.uiState.value.sortMenuExpanded)
     }
 
@@ -199,28 +212,67 @@ class HomeViewModelTest {
     /****/
 
     @Test
-    fun testUpdateConversationOrder() {
-        viewModel.updateConversationOrder(ConversationOrder.TITLE_ASC)
-        assertEquals(
-            ConversationOrder.TITLE_ASC,
-            viewModel.uiState.value.conversationOrder
-        )
+    fun testCollapseSortMenu() {
+        viewModel.toggleSortMenu()
+        assertTrue(viewModel.uiState.value.sortMenuExpanded)
+        viewModel.collapseSortMenu()
+        assertFalse(viewModel.uiState.value.sortMenuExpanded)
     }
 
 
     /****/
 
     @Test
-    fun testUpdateConversationFilter() {
-        viewModel.updateConversationFilter(ConversationFilter.FAVOURITES)
-        assertEquals(
-            ConversationFilter.FAVOURITES,
-            viewModel.uiState.value.conversationFilter
-        )
+    fun testUpdateTitleOrder() {
+        assertNotEquals(ConversationOrder.TITLE_ASC, viewModel.uiState.value.conversationOrder)
+        viewModel.updateTitleOrder()
+        assertEquals(ConversationOrder.TITLE_ASC, viewModel.uiState.value.conversationOrder)
+        viewModel.updateTitleOrder()
+        assertEquals(ConversationOrder.TITLE_DESC, viewModel.uiState.value.conversationOrder)
     }
 
 
     /****/
+
+    @Test
+    fun testUpdateDateOrder() {
+        assertEquals(ConversationOrder.DATE_DESC, viewModel.uiState.value.conversationOrder)
+        viewModel.updateDateOrder()
+        assertEquals(ConversationOrder.DATE_ASC, viewModel.uiState.value.conversationOrder)
+        viewModel.updateDateOrder()
+        assertEquals(ConversationOrder.DATE_DESC, viewModel.uiState.value.conversationOrder)
+    }
+
+
+    /****/
+
+    @Test
+    fun testFilterConversationsOnFavourite() {
+        assertEquals(ConversationFilter.NONE, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.FAVOURITES)
+        assertEquals(ConversationFilter.FAVOURITES, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.FAVOURITES)
+        assertEquals(ConversationFilter.NONE, viewModel.uiState.value.conversationFilter)
+    }
+
+    @Test
+    fun testFilterConversationsOnDeleteSoon() {
+        assertEquals(ConversationFilter.NONE, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.DELETE_SOON)
+        assertEquals(ConversationFilter.DELETE_SOON, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.DELETE_SOON)
+        assertEquals(ConversationFilter.NONE, viewModel.uiState.value.conversationFilter)
+    }
+
+    @Test
+    fun testFilterConversationsInteractions() {
+        assertEquals(ConversationFilter.NONE, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.DELETE_SOON)
+        assertEquals(ConversationFilter.DELETE_SOON, viewModel.uiState.value.conversationFilter)
+        viewModel.filterConversations(ConversationFilter.FAVOURITES)
+        assertEquals(ConversationFilter.FAVOURITES, viewModel.uiState.value.conversationFilter)
+    }
+
 
     @Test
     fun testUpdateSearchQuery() {
