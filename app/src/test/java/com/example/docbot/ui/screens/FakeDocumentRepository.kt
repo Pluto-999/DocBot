@@ -13,6 +13,7 @@ class FakeDocumentRepository: DocumentRepository {
     private val processingStatusFlow = MutableStateFlow<List<ProcessingStatus>>(emptyList())
 
     var successfulProcess = true
+    var throwExceptionOnChunk = false
 
     override suspend fun processDocument(
         uri: Uri,
@@ -21,7 +22,9 @@ class FakeDocumentRepository: DocumentRepository {
         return successfulProcess
     }
 
-    override suspend fun processChunks(documentId: Long, documentContents: String) { }
+    override suspend fun processChunks(documentId: Long, documentContents: String) {
+        if (throwExceptionOnChunk) throw Exception("chunking failed")
+    }
 
     override fun updateProcessingStatus(
         documentId: Long,

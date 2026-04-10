@@ -14,6 +14,7 @@ class FakeConversationRepository: ConversationRepository {
     private val conversationsFlow = MutableStateFlow<List<Conversation>>(emptyList())
     var favouriteToggleSuccess = true
     var returnNullTitle = false
+    var deleteOldConversationsCalled = false
 
     override fun createConversation(): Long {
         val conversationId = (conversations.size + 1).toLong()
@@ -35,7 +36,9 @@ class FakeConversationRepository: ConversationRepository {
         conversationsFlow.value = conversations.toList()
     }
 
-    override fun deleteOldConversations() { }
+    override fun deleteOldConversations() {
+        deleteOldConversationsCalled = true
+    }
 
     override fun getConversations(
         order: ConversationOrder,
