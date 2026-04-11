@@ -53,7 +53,7 @@ fun ConversationCard(
                         else {
                             Icons.Default.FavoriteBorder
                         },
-                    contentDescription = "Favourite",
+                    contentDescription = if (isFavourite) "Favourite" else "Not Favourite",
                     modifier = Modifier.size(28.dp)
                 )
             }

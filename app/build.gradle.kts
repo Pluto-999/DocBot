@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+//    jacoco
 }
 
 android {
@@ -41,6 +42,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+//        debug {
+//            enableAndroidTestCoverage = true
+//            enableUnitTestCoverage = true
+//        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -51,7 +56,13 @@ android {
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
+//        unitTests {
+//            isIncludeAndroidResources = true
+//        }
     }
+//    testCoverage {
+//        jacocoVersion = "0.8.14"
+//    }
 
     packaging {
         jniLibs {
@@ -105,6 +116,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutine.test)
     testImplementation(libs.kotlinx.robolectric)
     testImplementation(libs.androidx.test.core)
+//    testImplementation(libs.androidx.compose.ui.test.junit4)
+//    testImplementation(libs.androidx.compose.ui.test.manifest)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

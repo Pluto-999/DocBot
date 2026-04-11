@@ -107,8 +107,16 @@ class MessageLocalDataSourceTest: ObjectBoxTest() {
     @Test
     fun testGetRecentMessages() {
         val messageOne = Message(contents = "1", messageType = MessageType.PROMPT)
-        val messageTwo = Message(contents = "2", messageType = MessageType.PROMPT)
-        val messageThree = Message(contents = "3", messageType = MessageType.RESPONSE)
+        val messageTwo = Message(
+            contents = "2",
+            messageType = MessageType.PROMPT,
+            timestamp = LocalDateTime.now().minusDays(1)
+        )
+        val messageThree = Message(
+            contents = "3",
+            messageType = MessageType.RESPONSE,
+            timestamp = LocalDateTime.now().minusDays(2)
+        )
         messageBox.put(messageOne, messageTwo, messageThree)
 
         val conversation = Conversation()
