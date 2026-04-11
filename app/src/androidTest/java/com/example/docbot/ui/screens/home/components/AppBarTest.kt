@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.Espresso
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -31,18 +32,18 @@ class AppBarTest {
     ) {
         composeTestRule.setContent {
             AppBar(
-                sortIconOnClick = sortIconOnClick,
-                sortMenuExpanded = sortMenuExpanded,
-                sortMenuDismiss = sortMenuDismiss,
-                filterIconOnClick = filterIconOnClick,
-                filterMenuExpanded = filterMenuExpanded,
-                filterMenuDismiss = filterMenuDismiss,
-                titleOnClick = titleOnClick,
+                sortIconOnClick,
+                sortMenuExpanded,
+                sortMenuDismiss,
+                filterIconOnClick,
+                filterMenuExpanded,
+                filterMenuDismiss,
+                titleOnClick,
                 titleIcon = { Icon(Icons.Default.Title, contentDescription = "Title") },
-                dateOnClick = dateOnClick,
+                dateOnClick,
                 dateIcon = { Icon(Icons.Default.DateRange, contentDescription = "Date") },
-                favouriteOnClick = favouriteOnClick,
-                deleteSoonOnClick = deleteSoonOnClick
+                favouriteOnClick,
+                deleteSoonOnClick
             )
         }
     }
@@ -58,6 +59,9 @@ class AppBarTest {
         composeTestRule.onNodeWithContentDescription("Filter").assertExists()
     }
 
+
+    /****/
+
     @Test
     fun testSortMenuIsNotVisibleWhenCollapsed() {
         setAppBar()
@@ -70,6 +74,16 @@ class AppBarTest {
         setAppBar(sortMenuExpanded = true)
         composeTestRule.onNodeWithText("Title").assertExists()
         composeTestRule.onNodeWithText("Date").assertExists()
+    }
+
+    @Test
+    fun testPressingBackWhenSortMenuIsExpandedTriggersSortMenuDismiss() {
+        var dismissed = false
+        setAppBar(sortMenuExpanded = true, sortMenuDismiss = { dismissed = true })
+
+        Espresso.pressBack()
+
+        assertTrue(dismissed)
     }
 
     @Test
@@ -96,6 +110,9 @@ class AppBarTest {
         assertTrue(clicked)
     }
 
+
+    /****/
+
     @Test
     fun testFilterMenuIsNotVisibleWhenCollapsed() {
         setAppBar()
@@ -108,6 +125,16 @@ class AppBarTest {
         setAppBar(filterMenuExpanded = true)
         composeTestRule.onNodeWithText("Favourites").assertExists()
         composeTestRule.onNodeWithText("Soon to be deleted").assertExists()
+    }
+
+    @Test
+    fun testPressingBackWhenFilterMenuIsExpandedTriggersFilterMenuDismiss() {
+        var dismissed = false
+        setAppBar(filterMenuExpanded = true, filterMenuDismiss = { dismissed = true })
+
+        Espresso.pressBack()
+
+        assertTrue(dismissed)
     }
 
     @Test

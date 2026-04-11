@@ -22,14 +22,7 @@ class ConversationCardTest {
         deleteClick: () -> Unit = {}
     ) {
         composeTestRule.setContent {
-            ConversationCard(
-                title = title,
-                date = date,
-                isFavourite = isFavourite,
-                openConversation = openConversation,
-                favouriteClick = favouriteClick,
-                deleteClick = deleteClick
-            )
+            ConversationCard(title, date, isFavourite, openConversation, favouriteClick, deleteClick)
         }
     }
 

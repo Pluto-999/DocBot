@@ -29,10 +29,10 @@ class ConversationListTest {
     ) {
         composeTestRule.setContent {
             ConversationList(
-                conversations = conversations,
-                onConversationFavouriteClick = onConversationFavouriteClick,
-                onConversationDeleteClick = onConversationDeleteClick,
-                onConversationClick = onConversationClick
+                conversations,
+                onConversationFavouriteClick,
+                onConversationDeleteClick,
+                onConversationClick
             )
         }
     }

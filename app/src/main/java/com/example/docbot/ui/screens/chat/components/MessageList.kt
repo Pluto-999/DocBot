@@ -3,48 +3,30 @@ package com.example.docbot.ui.screens.chat.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.docbot.data.models.MessageType
 import com.example.docbot.ui.screens.chat.MessageState
-import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MessageList(
     messages: List<MessageState>,
     currentResponse: String,
+    listState: LazyListState,
     modifier: Modifier = Modifier
 ) {
-    // scrolling to bottom of list
-    val listState = rememberLazyListState()
-    val isImeVisible = WindowInsets.isImeVisible
-
-    LaunchedEffect(messages.size, currentResponse, isImeVisible) {
-        if (isImeVisible) {
-            delay(300)
-        }
-        val totalItems = if (currentResponse.isNotEmpty()) messages.size + 1 else messages.size
-        if (totalItems > 0) {
-            listState.scrollToItem(index = totalItems - 1, scrollOffset = Int.MAX_VALUE)
-        }
-    }
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -54,34 +36,22 @@ fun MessageList(
             .fillMaxWidth()
     ) {
         items(messages) { message ->
-            if (message.messageType == MessageType.PROMPT) {
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = modifier.fillMaxWidth()
-                ) {
-                    Box (
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(12.dp)
-                    ){
-                        Text(message.contents)
-                    }
-                }
-            }
-            else if (message.messageType == MessageType.RESPONSE){
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth()
+            Row(
+                horizontalArrangement =
+                    if (message.messageType == MessageType.PROMPT) Arrangement.End
+                    else Arrangement.Start,
+                modifier = modifier.fillMaxWidth()
+            ) {
+                Box (
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (message.messageType == MessageType.PROMPT) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.secondaryContainer
+                        )
+                        .padding(12.dp)
                 ){
-                    Box (
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .padding(12.dp)
-                    ){
-                        Text(message.contents)
-                    }
+                    Text(message.contents)
                 }
             }
         }

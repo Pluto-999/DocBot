@@ -6,10 +6,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Edit
@@ -34,8 +38,9 @@ import com.example.docbot.ui.screens.chat.components.DocumentPicker
 import com.example.docbot.ui.screens.chat.components.MessageList
 import com.example.docbot.ui.screens.chat.components.MessageTextBox
 import com.example.docbot.ui.screens.chat.components.UpdateConversationTitle
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ChatScreen(
     conversationId: Long,
@@ -50,6 +55,22 @@ fun ChatScreen(
         uiState.errorMessage?.let { message ->
             snackbarHostState.showSnackbar(message)
             viewModel.clearErrorMessage()
+        }
+    }
+
+    // scrolling to bottom of list
+    val listState = rememberLazyListState()
+    val isImeVisible = WindowInsets.isImeVisible
+
+    LaunchedEffect(uiState.messages.size, uiState.currentResponseMessage, isImeVisible) {
+        if (isImeVisible) {
+            delay(300)
+        }
+        val totalItems =
+            if (uiState.currentResponseMessage.isNotEmpty()) uiState.messages.size + 1
+            else uiState.messages.size
+        if (totalItems > 0) {
+            listState.scrollToItem(index = totalItems - 1, scrollOffset = Int.MAX_VALUE)
         }
     }
 
@@ -124,6 +145,7 @@ fun ChatScreen(
             MessageList(
                 messages = uiState.messages,
                 currentResponse = uiState.currentResponseMessage,
+                listState = listState,
                 modifier = Modifier.weight(1f)
             )
             MessageTextBox(

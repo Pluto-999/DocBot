@@ -19,7 +19,7 @@ class SearchBarTest {
         onValueChange: (String) -> Unit = {}
     ) {
         composeTestRule.setContent {
-            SearchBar(value = value, onValueChange = onValueChange)
+            SearchBar(value, onValueChange)
         }
     }
 

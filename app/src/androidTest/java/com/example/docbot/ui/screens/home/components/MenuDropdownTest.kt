@@ -4,6 +4,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.test.espresso.Espresso
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,11 +20,7 @@ class MenuDropdownTest {
         menuContents: @Composable () -> Unit = { Text("Contents") }
     ) {
         composeTestRule.setContent {
-            MenuDropdown(
-                expanded = expanded,
-                onDismiss = onDismiss,
-                menuContents = menuContents
-            )
+            MenuDropdown(expanded, onDismiss, menuContents)
         }
     }
 
@@ -39,5 +37,15 @@ class MenuDropdownTest {
     fun testMenuContentsNotDisplayedWhenMenuIsNotExpanded() {
         setMenuDropdown(expanded = false)
         composeTestRule.onNodeWithText("Contents").assertDoesNotExist()
+    }
+
+    @Test
+    fun testBackPressTriggersOnDismissCallback() {
+        var dismissed = false
+        setMenuDropdown(onDismiss = { dismissed = true })
+
+        Espresso.pressBack()
+
+        assertTrue(dismissed)
     }
 }

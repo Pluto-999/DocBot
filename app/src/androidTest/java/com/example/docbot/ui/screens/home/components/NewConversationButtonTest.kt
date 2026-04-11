@@ -15,7 +15,7 @@ class NewConversationButtonTest {
 
     private fun setNewConversationButton(createConversation: () -> Unit = {}) {
         composeTestRule.setContent {
-            NewConversationButton(createConversation = createConversation)
+            NewConversationButton(createConversation)
         }
     }
 
