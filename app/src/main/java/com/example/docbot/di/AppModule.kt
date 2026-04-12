@@ -25,12 +25,11 @@ import com.example.docbot.data.document.processing.TextExtractor
 import com.example.docbot.data.embedding.EmbeddingGenerator
 import com.example.docbot.data.embedding.GemmaEmbeddingGenerator
 import com.example.docbot.data.message.MessageLocalDataSource
-import com.example.docbot.data.message.generation.MessageGenerator
 import com.example.docbot.data.message.generation.MessageProcessor
-import com.example.docbot.data.message.generation.PromptFormatter
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -134,23 +133,31 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEmbeddingGenerator(): EmbeddingGenerator {
-        return GemmaEmbeddingGenerator()
-    }
-
-    @Provides
-    @Singleton
     fun provideEngine(
         @ApplicationContext applicationContext: Context
     ): Engine {
         return Engine(
             EngineConfig(
-//                modelPath = "/data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm",
-//                backend = Backend.CPU
                 modelPath = "${applicationContext.filesDir}/slm/gemma-3n-E2B-it-int4.litertlm",
                 backend = Backend.GPU
             )
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmbeddingGemma(): GemmaEmbeddingModel {
+        return GemmaEmbeddingModel(
+            "/data/local/tmp/slm/embeddinggemma-300M_seq1024_mixed-precision.tflite",
+            "/data/local/tmp/slm/sentencepiece.model",
+            false
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmbeddingGenerator(embeddingModel: GemmaEmbeddingModel): EmbeddingGenerator {
+        return GemmaEmbeddingGenerator(embeddingModel)
     }
 
     @Provides

@@ -10,10 +10,10 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDateTime
 
-class HomeViewModelTest {
+class HomeViewModelImplTest {
 
     private lateinit var fakeRepository: FakeConversationRepository
-    private lateinit var viewModel: HomeViewModel
+    private lateinit var viewModel: HomeViewModelImpl
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -21,7 +21,7 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         fakeRepository = FakeConversationRepository()
-        viewModel = HomeViewModel(fakeRepository)
+        viewModel = HomeViewModelImpl(fakeRepository)
     }
 
 

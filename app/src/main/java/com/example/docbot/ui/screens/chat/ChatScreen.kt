@@ -33,18 +33,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.docbot.ui.screens.chat.components.LoadingIndicator
-import com.example.docbot.ui.screens.chat.components.DocumentPicker
+import com.example.docbot.ui.screens.chat.components.ConversationTitleDialog
+import com.example.docbot.ui.screens.chat.components.DocumentPickerSheet
+import com.example.docbot.ui.screens.chat.components.LoadingIndicators
 import com.example.docbot.ui.screens.chat.components.MessageList
 import com.example.docbot.ui.screens.chat.components.MessageTextBox
-import com.example.docbot.ui.screens.chat.components.UpdateConversationTitle
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ChatScreen(
     conversationId: Long,
-    viewModel: ChatViewModel = hiltViewModel<ChatViewModel, ChatViewModelFactory>{
+    viewModel: ChatViewModel = hiltViewModel<ChatViewModelImpl, ChatViewModelImplFactory>{
         factory -> factory.create(conversationId)
     }
 ) {
@@ -160,32 +160,23 @@ fun ChatScreen(
             )
         }
 
-        if (uiState.openUpdateConversationTitleDialog) {
-            UpdateConversationTitle(
-                onDismissRequest = { viewModel.toggleUpdateConversationTitleDialog(false) },
-                value = uiState.title,
-                onValueChange = {
-                    viewModel.updateConversationTitle(newTitle = it)
-                }
-            )
-        }
+        ConversationTitleDialog(
+            isOpen = uiState.openUpdateConversationTitleDialog,
+            onDismissRequest = { viewModel.toggleUpdateConversationTitleDialog(false) },
+            value = uiState.title,
+            onValueChange = { viewModel.updateConversationTitle(newTitle = it) }
+        )
 
-        if (uiState.openDocumentPickerSheet) {
-            DocumentPicker(
-                onDismissRequest = {
-                    viewModel.toggleDocumentPickerDialog(false)
-                },
-                openDocumentPicker = { openFilePickerActivity() },
-                documentNames = uiState.documentNames
-            )
-        }
+        DocumentPickerSheet(
+            isOpen = uiState.openDocumentPickerSheet,
+            onDismissRequest = { viewModel.toggleDocumentPickerDialog(false) },
+            openDocumentPicker = { openFilePickerActivity() },
+            documentNames = uiState.documentNames
+        )
 
-        if (uiState.documentProcessing) {
-            LoadingIndicator(message = "Processing document")
-        }
-
-        if (uiState.modelInference) {
-            LoadingIndicator(message = "Model generating response")
-        }
+        LoadingIndicators(
+            isDocumentProcessing = uiState.documentProcessing,
+            isModelInference = uiState.modelInference
+        )
     }
 }

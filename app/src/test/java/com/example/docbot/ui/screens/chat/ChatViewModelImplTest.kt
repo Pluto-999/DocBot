@@ -16,13 +16,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class ChatViewModelTest {
+class ChatViewModelImplTest {
 
     private lateinit var fakeConversationRepository: FakeConversationRepository
     private lateinit var fakeMessageRepository: FakeMessageRepository
     private lateinit var fakeDocumentRepository: FakeDocumentRepository
 
-    private lateinit var viewModel: ChatViewModel
+    private lateinit var viewModel: ChatViewModelImpl
     private val conversationId: Long = 1
 
     @get:Rule
@@ -36,7 +36,7 @@ class ChatViewModelTest {
 
         val conversationId = fakeConversationRepository.createConversation()
 
-        viewModel = ChatViewModel(
+        viewModel = ChatViewModelImpl(
             fakeConversationRepository,
             fakeMessageRepository,
             fakeDocumentRepository,
@@ -52,7 +52,7 @@ class ChatViewModelTest {
     fun testGetConversationTitleWhenNullOnInit() {
         fakeConversationRepository.returnNullTitle = true
 
-        viewModel = ChatViewModel(
+        viewModel = ChatViewModelImpl(
             fakeConversationRepository,
             fakeMessageRepository,
             fakeDocumentRepository,

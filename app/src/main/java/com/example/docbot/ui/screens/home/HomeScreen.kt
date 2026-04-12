@@ -28,7 +28,7 @@ import com.example.docbot.ui.screens.home.components.SearchBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel<HomeViewModel>(),
+    viewModel: HomeViewModel = hiltViewModel<HomeViewModelImpl>(),
     onConversationNavigate: (id: Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -59,7 +59,12 @@ fun HomeScreen(
                             } else {
                                 Icons.Default.ArrowDownward
                             },
-                        contentDescription = "Sort Title"
+                        contentDescription =
+                            if (uiState.conversationOrder == ConversationOrder.TITLE_ASC) {
+                                "Title Ascending"
+                            } else {
+                                "Title Descending"
+                            }
                     )
                 },
                 dateOnClick = { viewModel.updateDateOrder() },
@@ -72,7 +77,13 @@ fun HomeScreen(
                             else {
                                 Icons.Default.ArrowDownward
                             },
-                        contentDescription = "Sort Date"
+                        contentDescription =
+                            if (uiState.conversationOrder == ConversationOrder.DATE_ASC) {
+                                "Date Ascending"
+                            }
+                            else {
+                                "Date Descending"
+                            }
                     )
                 },
                 favouriteOnClick = { viewModel.filterConversations(ConversationFilter.FAVOURITES) },

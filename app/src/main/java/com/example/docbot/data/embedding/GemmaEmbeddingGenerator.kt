@@ -5,10 +5,11 @@ import com.google.ai.edge.localagents.rag.models.EmbeddingRequest
 import com.google.ai.edge.localagents.rag.models.GemmaEmbeddingModel
 import com.google.common.collect.ImmutableList
 import kotlinx.coroutines.guava.await
+import javax.inject.Inject
 
-class GemmaEmbeddingGenerator: EmbeddingGenerator {
-
-    private var embeddingModel: GemmaEmbeddingModel? = null
+class GemmaEmbeddingGenerator @Inject constructor(
+    private val embeddingModel: GemmaEmbeddingModel
+): EmbeddingGenerator {
 
     override suspend fun generateEmbedding(
         data: String,
@@ -16,19 +17,11 @@ class GemmaEmbeddingGenerator: EmbeddingGenerator {
         isQuery: Boolean
     ): ImmutableList<Float> {
 
-        if (embeddingModel == null) {
-            embeddingModel = GemmaEmbeddingModel(
-                "/data/local/tmp/slm/embeddinggemma-300M_seq1024_mixed-precision.tflite",
-                "/data/local/tmp/slm/sentencepiece.model",
-                false
-            )
-        }
-
         val dataToEmbed = EmbedData.create<String>(data, taskType, isQuery)
 
         val embeddingRequest = EmbeddingRequest.create<String>(listOf(dataToEmbed))
 
-        val embeddingFuture = embeddingModel!!.getEmbeddings(embeddingRequest)
+        val embeddingFuture = embeddingModel.getEmbeddings(embeddingRequest)
 
         val embedding = embeddingFuture.await()
 
