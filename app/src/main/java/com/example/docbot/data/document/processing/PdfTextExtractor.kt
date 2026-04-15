@@ -41,7 +41,7 @@ class PdfTextExtractor @Inject constructor(
         }
         finally {
             document.close()
-            pdfInputStream?.close() // maybe need this ??
+            pdfInputStream?.close()
         }
     }
 

@@ -18,11 +18,11 @@ class MessageGenerator @Inject constructor(
         if (!engineInitialised) {
             try {
                 engine.initialize()
+                engineInitialised = true
             }
             catch (e: IllegalStateException) {
                 Log.e("Engine initialisation", "$e")
             }
-            engineInitialised = true
         }
     }
 

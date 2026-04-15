@@ -13,9 +13,7 @@ fun ConversationTitleDialog(
         UpdateConversationTitle(
             onDismissRequest = { onDismissRequest() },
             value = value,
-            onValueChange = {
-                onValueChange(it)
-            }
+            onValueChange = { onValueChange(it) }
         )
     }
 }

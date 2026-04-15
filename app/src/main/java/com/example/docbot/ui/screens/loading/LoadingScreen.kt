@@ -9,7 +9,7 @@ import com.example.docbot.ui.screens.chat.components.LoadingIndicator
 
 @Composable
 fun LoadingScreen(
-    viewModel: LoadingViewModel = hiltViewModel<LoadingViewModel>(),
+    viewModel: LoadingViewModel = hiltViewModel<LoadingViewModelImpl>(),
     onReady: () -> Unit
 ) {
     val context = LocalContext.current

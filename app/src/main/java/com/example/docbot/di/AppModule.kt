@@ -39,6 +39,7 @@ import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import java.io.File
 import javax.inject.Singleton
 
 @Module
@@ -166,6 +167,12 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): WorkManager {
         return WorkManager.getInstance(applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideModelInitialiserFile(): File {
+        return File("/data/local/tmp/slm")
     }
 
     @Provides

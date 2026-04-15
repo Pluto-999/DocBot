@@ -12,7 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 
-class LoadingViewModelTest {
+class LoadingViewModelImplTest {
 
     private lateinit var messageGeneratorMock: MessageGenerator
     private lateinit var modelInitialiserMock: ModelInitialiser
@@ -23,7 +23,7 @@ class LoadingViewModelTest {
         messageGeneratorMock = mockk<MessageGenerator>()
         modelInitialiserMock = mockk<ModelInitialiser>()
 
-        viewModel = LoadingViewModel(messageGeneratorMock, modelInitialiserMock)
+        viewModel = LoadingViewModelImpl(messageGeneratorMock, modelInitialiserMock)
     }
 
 
@@ -31,13 +31,13 @@ class LoadingViewModelTest {
 
     @Test
     fun testInitialiseCallsModelInitialiserAndMessageGenerator() = runTest {
-        val fakeFilesDir = File("/fake/dir")
-        coEvery { modelInitialiserMock.initialiseModel(fakeFilesDir) } just runs
+        val fakeFilesDirectory = File("/fake/dir")
+        coEvery { modelInitialiserMock.initialiseModel(fakeFilesDirectory) } just runs
         coEvery { messageGeneratorMock.initialiseEngine() } just runs
 
-        viewModel.initialise(fakeFilesDir)
+        viewModel.initialise(fakeFilesDirectory)
 
-        coVerify { modelInitialiserMock.initialiseModel(fakeFilesDir) }
+        coVerify { modelInitialiserMock.initialiseModel(fakeFilesDirectory) }
         coVerify { messageGeneratorMock.initialiseEngine() }
     }
 }
