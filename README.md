@@ -14,7 +14,7 @@
 4. Download EmbeddingGemma from [this link](https://huggingface.co/litert-community/embeddinggemma-300m/tree/main), ensuring to download the file named `embeddinggemma-300M_seq1024_mixed-precision.tflite`. Additionally, also download the `sentencepiece.model` file from this same link.
 5. Now that all three files are downloaded, perform the following three commands within the project directory while the Android device is connected:
 
-`adb push [gemma-3n-E2B file path] /data/local/tmp/gemma-3n-E2B-it-int4.litertlm`
+`adb push [gemma-3n-E2B file path] /data/local/tmp/slm/gemma-3n-E2B-it-int4.litertlm`
 
 `adb push [EmbeddingGemma download path] /data/local/tmp/slm/embeddinggemma-300M_seq1024_mixed-precision.tflite`
 
