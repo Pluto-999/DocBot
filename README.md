@@ -32,6 +32,11 @@ gemma-3n-E2B-it-int4.litertlm
 sentencepiece.model
 ```
 
+NOTE: If adb is not recognised as a command, locate the adb executable and use this full path in place of the adb command. The typical locations are as follows:
+- `~/Android/Sdk/platform-tools/adb` on Linux
+- `~/Library/Android/sdk/platform-tools/adb` on Mac
+- `C:\Users\[username]\AppData\Local\Android\Sdk\platform-tools\adb.exe` on Windows
+
 ## Running the app & the tests
 
 ### Running the app
